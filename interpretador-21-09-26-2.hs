@@ -346,6 +346,10 @@ prog8 = Print (Call "dobro" [Lit 4])
 prog9 :: Stmt
 prog9 = Return (FLit 2.5)
 
+-- retorna (3.5)
+prog10 :: Stmt
+prog10 = Return (BinE Add (FLit 1.5) (FLit 2.0))
+
 -- ============================================================
 -- Suite de testes HUnit
 -- ============================================================
@@ -399,6 +403,11 @@ testFloatLiteral = TestCase $ do
   v <- runProg Map.empty prog9
   assertEqual "retorna 2.5" (VFloat 2.5) v
 
+testSomaFloatFloat :: Test
+testSomaFloatFloat = TestCase $ do
+  v <- runProg Map.empty prog10
+  assertEqual "retorna 3.5" (VFloat 3.5) v
+
 -- suite completa
 
 suite :: Test
@@ -412,6 +421,7 @@ suite = TestList
   , TestLabel "while imprime"        testWhileImprime
   , TestLabel "imprime call dobro"   testImprimeCallDobro
   , TestLabel "float literal"        testFloatLiteral
+  , TestLabel "soma float float"     testSomaFloatFloat
   ]
 
 main :: IO ()
