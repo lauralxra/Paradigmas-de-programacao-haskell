@@ -132,6 +132,7 @@ evalExpr fenv env expr = case expr of
 
 evalBinOp :: BinOp -> Value -> Value -> Value
 evalBinOp Add (VInt  a) (VInt  b) = VInt  (a + b)
+evalBinOp Add (VFloat a) (VFloat b) = VFloat (a + b)
 evalBinOp Sub (VInt  a) (VInt  b) = VInt  (a - b)
 evalBinOp Mul (VInt  a) (VInt  b) = VInt  (a * b)
 evalBinOp Div (VInt  a) (VInt  b) = VInt  (a `div` b)
