@@ -18,6 +18,7 @@ data Type
   = TInt
   | TBool
   | TVoid
+  | TFloat
   deriving (Show, Eq)
 
 data BinOp
@@ -33,6 +34,7 @@ data Expr
   | BinE  BinOp Expr Expr
   | Not   Expr
   | Call  String [Expr]
+  | FLit Float
   deriving (Show, Eq)
 
 data Stmt
@@ -61,6 +63,7 @@ data Value
   = VInt  Int
   | VBool Bool
   | VVoid
+  | VFloat Float
   deriving (Show, Eq)
 
 -- variaveis no escopo do programa
@@ -86,6 +89,7 @@ evalExpr :: FunEnv -> Env -> Expr -> IO Value
 evalExpr fenv env expr = case expr of
 
   Lit  n -> return (VInt n)
+  FLit n -> return (VFloat n)
   BLit b -> return (VBool b)
 
   Var x  -> case Map.lookup x env of
@@ -214,6 +218,7 @@ execBlock fenv env (s:ss) = do
 
 showValue :: Value -> String
 showValue (VInt  n) = show n
+showValue (VFloat n) = show n
 showValue (VBool b) = if b then "verdadeiro" else "falso"
 showValue VVoid     = "()"
 
