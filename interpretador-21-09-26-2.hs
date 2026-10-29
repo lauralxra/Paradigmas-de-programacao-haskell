@@ -353,8 +353,12 @@ prog10 :: Stmt
 prog10 = Return (BinE Add (FLit 1.5) (FLit 2.0))
 
 -- soma int e float
-prog11 ::Stmt
+prog11 :: Stmt
 prog11 = Return (BinE Add (Lit 2) (FLit 1.5))
+
+--soma float e int
+prog12 :: Stmt
+prog12 = Return (BinE Add (FLit 1.5) (Lit 2))
 
 -- ============================================================
 -- Suite de testes HUnit
@@ -419,6 +423,11 @@ testSomaIntFloat = TestCase $ do
   v <- runProg Map.empty prog11
   assertEqual "soma int e float" (VFloat 3.5) v
 
+testSomaFloatInt :: Test
+testSomaFloatInt = TestCase $ do 
+  v <- runProg Map.empty prog12
+  assertEqual "soma float e int" (VFloat 3.5) v  
+
 -- suite completa
 
 suite :: Test
@@ -434,6 +443,7 @@ suite = TestList
   , TestLabel "float literal"        testFloatLiteral
   , TestLabel "soma float float"     testSomaFloatFloat
   , TestLabel "soma int float"       testSomaIntFloat
+  , TestLabel "soma float int"       testSomaFloatInt
   ]
 
 main :: IO ()
