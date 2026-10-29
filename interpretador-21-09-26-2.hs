@@ -391,6 +391,10 @@ prog17 = Return (BinE Mul (FLit 2.5) (Lit 2))
 prog18 :: Stmt
 prog18 = Return (BinE Mul (Lit 2) (FLit 2.5))
 
+-- divisao float float
+prog19 :: Stmt
+prog19 = Return (BinE Div (FLit 5.0) (FLit 2.0))
+
 -- ============================================================
 -- Suite de testes HUnit
 -- ============================================================
@@ -477,6 +481,11 @@ testMulIntFloat = TestCase $ do
   v <- runProg Map.empty prog18
   assertEqual "multiplicacao int e float" (VFloat 5.0) v 
 
+testDivFloatFloat :: Test
+testDivFloatFloat = TestCase $ do
+  v <- runProg Map.empty prog19
+  assertEqual "divisao float e float" (VFloat 2.5) v  
+
 -- testes de saída impressa (usam runProgIO)
 
 testWhileImprime :: Test
@@ -510,7 +519,8 @@ suite = TestList
   , TestLabel "sub int float"        testSubIntFloat
   , TestLabel "mul float float"      testMulFloatFloat
   , TestLabel "mul float int"        testMulFloatInt
-  , TestLabel "mul int float"        testMulIntFloat  
+  , TestLabel "mul int float"        testMulIntFloat
+  , TestLabel "div float float"      testDivFloatFloat
   ]
 
 main :: IO ()
