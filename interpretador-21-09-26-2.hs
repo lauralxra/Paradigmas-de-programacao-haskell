@@ -361,6 +361,10 @@ prog11 = Return (BinE Add (Lit 2) (FLit 1.5))
 prog12 :: Stmt
 prog12 = Return (BinE Add (FLit 1.5) (Lit 2))
 
+-- subtracao float float
+prog13 :: Stmt
+prog13 = Return (BinE Sub (FLit 3.5) (FLit 1.5))
+
 -- ============================================================
 -- Suite de testes HUnit
 -- ============================================================
@@ -397,18 +401,6 @@ testChamadaAninhada = TestCase $ do
   v <- runProg fenvExemplo prog6
   assertEqual "soma(dobro(4), 3) eh 11" (VInt 11) v
 
--- testes de saída impressa (usam runProgIO)
-
-testWhileImprime :: Test
-testWhileImprime = TestCase $ do
-  output <- runProgIO Map.empty prog7
-  assertEqual "while imprime 0, 1, 2" "0\n1\n2\n" output
-
-testImprimeCallDobro :: Test
-testImprimeCallDobro = TestCase $ do
-  output <- runProgIO fenvExemplo prog8
-  assertEqual "imprime dobro(4)" "8\n" output
-
 testFloatLiteral :: Test 
 testFloatLiteral = TestCase $ do
   v <- runProg Map.empty prog9
@@ -429,6 +421,23 @@ testSomaFloatInt = TestCase $ do
   v <- runProg Map.empty prog12
   assertEqual "soma float e int" (VFloat 3.5) v  
 
+testSubFloatFloat :: Test
+testSubFloatFloat = TestCase $ do
+  v <- runProg Map.empty prog13
+  assertEqual "subtracao float e float" (VFloat 2.0) v  
+
+-- testes de saída impressa (usam runProgIO)
+
+testWhileImprime :: Test
+testWhileImprime = TestCase $ do
+  output <- runProgIO Map.empty prog7
+  assertEqual "while imprime 0, 1, 2" "0\n1\n2\n" output
+
+testImprimeCallDobro :: Test
+testImprimeCallDobro = TestCase $ do
+  output <- runProgIO fenvExemplo prog8
+  assertEqual "imprime dobro(4)" "8\n" output
+
 -- suite completa
 
 suite :: Test
@@ -445,6 +454,7 @@ suite = TestList
   , TestLabel "soma float float"     testSomaFloatFloat
   , TestLabel "soma int float"       testSomaIntFloat
   , TestLabel "soma float int"       testSomaFloatInt
+  , TestLabel "sub float float"      testSubFloatFloat
   ]
 
 main :: IO ()
