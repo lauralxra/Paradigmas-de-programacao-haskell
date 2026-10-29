@@ -376,6 +376,10 @@ prog14 = Return (BinE Sub (FLit 3.5) (Lit 2))
 prog15 :: Stmt
 prog15 = Return (BinE Sub (Lit 5) (FLit 2.5))
 
+-- multiplicacao float float
+prog16 :: Stmt
+prog16 = Return (BinE Mul (FLit 2.5) (FLit 2.0))
+
 -- ============================================================
 -- Suite de testes HUnit
 -- ============================================================
@@ -447,6 +451,11 @@ testSubIntFloat = TestCase $ do
   v <- runProg Map.empty prog15
   assertEqual "subtracao int e float" (VFloat 2.5) v
 
+testMulFloatFloat :: Test
+testMulFloatFloat = TestCase $ do
+  v <- runProg Map.empty prog16
+  assertEqual "multiplicacao float e float" (VFloat 5.0) v  
+
 -- testes de saída impressa (usam runProgIO)
 
 testWhileImprime :: Test
@@ -478,6 +487,7 @@ suite = TestList
   , TestLabel "sub float float"      testSubFloatFloat
   , TestLabel "sub float int"        testSubFloatInt
   , TestLabel "sub int float"        testSubIntFloat
+  , TestLabel "mul float float"      testMulFloatFloat
   ]
 
 main :: IO ()
