@@ -451,6 +451,10 @@ prog29 = Return (BinE Le (FLit 2.5) (Lit 3))
 prog30 :: Stmt
 prog30 = Return (BinE Le (FLit 2.0) (FLit 2.5))
 
+-- comparacao Ge int float
+prog31 :: Stmt
+prog31 = Return (BinE Ge (Lit 3) (FLit 2.5))
+
 -- ============================================================
 -- Suite de testes HUnit
 -- ============================================================
@@ -595,7 +599,12 @@ testLeFloatInt = TestCase $ do
 testLeFloatFloat :: Test
 testLeFloatFloat = TestCase $ do
   v <- runProg Map.empty prog30
-  assertEqual "comparacao le float e float" (VBool True) v   
+  assertEqual "comparacao le float e float" (VBool True) v 
+
+testGeIntFloat :: Test
+testGeIntFloat = TestCase $ do
+  v <- runProg Map.empty prog31
+  assertEqual "comparacao ge int e float" (VBool True) v    
 
 -- testes de saída impressa (usam runProgIO)
 
@@ -643,6 +652,7 @@ suite = TestList
   , TestLabel "compa le int float"   testLeIntFloat
   , TestLabel "compa le float int"   testLeFloatInt
   , TestLabel "compa le float float" testLeFloatFloat
+  , TestLabel "compa ge int float"   testGeIntFloat
   ]
 
 main :: IO ()
