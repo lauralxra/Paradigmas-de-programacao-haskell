@@ -406,6 +406,10 @@ prog20 = Return (BinE Div (FLit 5.0) (Lit 2))
 prog21 :: Stmt
 prog21 = Return (BinE Div (Lit 5) (FLit 2.0))
 
+-- comparacao Lt int float
+prog22 :: Stmt
+prog22 = Return (BinE Lt (Lit 2) (FLit 2.5))
+
 -- ============================================================
 -- Suite de testes HUnit
 -- ============================================================
@@ -507,6 +511,11 @@ testDivIntFloat = TestCase $ do
   v <- runProg Map.empty prog21  
   assertEqual "divisao int e float" (VFloat 2.5) v  
 
+testLtIntFloat :: Test
+testLtIntFloat = TestCase $ do 
+  v <- runProg Map.empty prog22
+  assertEqual "comparacao lt int e float" (VBool True) v  
+
 -- testes de saída impressa (usam runProgIO)
 
 testWhileImprime :: Test
@@ -544,6 +553,7 @@ suite = TestList
   , TestLabel "div float float"      testDivFloatFloat
   , TestLabel "div float int"        testDivFloatInt
   , TestLabel "div int float"        testDivIntFloat
+  , TestLabel "compa lt int float"   testLtIntFloat
   ]
 
 main :: IO ()
