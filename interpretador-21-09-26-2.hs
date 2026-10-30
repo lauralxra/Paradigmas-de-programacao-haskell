@@ -436,6 +436,10 @@ prog26 = Return (BinE Gt (FLit 2.5) (Lit 2))
 prog27 :: Stmt
 prog27 = Return (BinE Gt (FLit 2.5) (FLit 2.0))
 
+-- comparacao Le int float
+prog28 :: Stmt
+prog28 = Return (BinE Le (Lit 2) (FLit 2.5))
+
 -- ============================================================
 -- Suite de testes HUnit
 -- ============================================================
@@ -567,6 +571,11 @@ testGtFloatFloat = TestCase $ do
   v <- runProg Map.empty prog27
   assertEqual "comparacao gt float e float" (VBool True) v  
 
+testLeIntFloat :: Test
+testLeIntFloat = TestCase $ do
+  v <- runProg Map.empty prog28
+  assertEqual "comparacao le int e float" (VBool True) v  
+
 -- testes de saída impressa (usam runProgIO)
 
 testWhileImprime :: Test
@@ -610,6 +619,7 @@ suite = TestList
   , TestLabel "compa gt int float"   testGtIntFloat
   , TestLabel "compa gt float int"   testGtFloatInt
   , TestLabel "compa gt float float" testGtFloatFloat
+  , TestLabel "compa le int float"   testLeIntFloat
   ]
 
 main :: IO ()
