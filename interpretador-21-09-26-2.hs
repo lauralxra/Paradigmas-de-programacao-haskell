@@ -164,6 +164,7 @@ evalBinOp Le  (VFloat a) (VInt b) = VBool (a <= fromIntegral b)
 evalBinOp Le  (VFloat a) (VFloat b) = VBool (a <= b)
 evalBinOp Ge  (VInt  a) (VInt  b) = VBool (a >= b)
 evalBinOp Ge  (VInt a) (VFloat b) = VBool (fromIntegral a >= b)
+evalBinOp Ge  (VFloat a) (VInt b) = VBool (a >= fromIntegral b)
 evalBinOp And (VBool a) (VBool b) = VBool (a && b)
 evalBinOp Or  (VBool a) (VBool b) = VBool (a || b)
 evalBinOp op  _         _         =
