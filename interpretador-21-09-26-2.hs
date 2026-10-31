@@ -186,10 +186,13 @@ execStmt fenv env stmt = case stmt of
     putStrLn (showValue v)
     return (Next env)
 
-  Decl _ x e -> do
+  Decl t x e -> do
     v <- evalExpr fenv env e
-    let env' = Map.insert x v env
-    return (Next env')
+    let v'   = ajustaValor t v
+        env' = Map.insert x v' env
+    -- seq obriga a conversao a acontecer agora: o Map eh preguicoso e o erro
+    -- de tipo nunca apareceria se a variavel nao fosse lida depois
+    v' `seq` return (Next env')
 
   Assign x e ->
     case Map.lookup x env of
@@ -235,6 +238,27 @@ execBlock fenv env (s:ss) = do
   case r of
     Returned v env' -> return (Returned v env')
     Next       env' -> execBlock fenv env' ss
+
+-- ============================================================
+-- Verificação de tipos
+-- ============================================================
+
+-- Descobre o tipo de um valor
+tipoDoValor :: Value -> Type
+tipoDoValor (VInt _)   = TInt
+tipoDoValor (VBool _)  = TBool
+tipoDoValor (VFloat _) = TFloat
+tipoDoValor VVoid      = TVoid
+
+-- Ajusta o valor ao tipo da variavel, convertendo Int <-> Float como em C
+ajustaValor :: Type -> Value -> Value
+ajustaValor TInt   (VInt n)   = VInt n
+ajustaValor TFloat (VInt n)   = VFloat (fromIntegral n)
+ajustaValor TFloat (VFloat n) = VFloat n
+ajustaValor TBool  (VBool b)  = VBool b
+ajustaValor t      v          =
+  error ("Tipo incompativel: variavel do tipo " ++ show t ++
+         " recebeu valor do tipo " ++ show (tipoDoValor v))
 
 -- ============================================================
 -- Utilitários
