@@ -533,6 +533,14 @@ prog39 = Block
   , Return (Var "x")
   ]
 
+-- int x = 1; x = 7; retorna x;
+prog40 :: Stmt
+prog40 = Block
+  [ Decl TInt "x" (Lit 1)
+  , Assign "x" (Lit 7)
+  , Return (Var "x")
+  ]
+
 -- ============================================================
 -- Suite de testes HUnit
 -- ============================================================
@@ -724,6 +732,11 @@ testDeclIntFloatNegativo = TestCase $ do
   v <- runProg Map.empty prog39
   assertEqual "int x = -3.9 vira -3" (VInt (-3)) v
 
+testAssignIntInt :: Test
+testAssignIntInt = TestCase $ do
+  v <- runProg Map.empty prog40
+  assertEqual "x = 7" (VInt 7) v
+
 -- testes de saída impressa (usam runProgIO)
 
 testWhileImprime :: Test
@@ -779,6 +792,7 @@ suite = TestList
   , TestLabel "decl float int"       testDeclFloatInt
   , TestLabel "decl int float"       testDeclIntFloat
   , TestLabel "decl int float neg"   testDeclIntFloatNegativo
+  , TestLabel "assign int int"       testAssignIntInt
   ]
 
 main :: IO ()
