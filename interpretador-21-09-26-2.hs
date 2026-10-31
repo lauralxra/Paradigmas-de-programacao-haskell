@@ -480,6 +480,13 @@ prog35 = Block
   , Return (Var "b")
   ]
 
+-- float f = 1.5; retorna f;
+prog36 :: Stmt
+prog36 = Block
+  [ Decl TFloat "f" (FLit 1.5)
+  , Return (Var "f")
+  ]
+
 -- ============================================================
 -- Suite de testes HUnit
 -- ============================================================
@@ -651,6 +658,11 @@ testDeclBoolBool = TestCase $ do
   v <- runProg Map.empty prog35
   assertEqual "bool b = verdadeiro" (VBool True) v
 
+testDeclFloatFloat :: Test
+testDeclFloatFloat = TestCase $ do
+  v <- runProg Map.empty prog36
+  assertEqual "float f = 1.5" (VFloat 1.5) v
+
 -- testes de saída impressa (usam runProgIO)
 
 testWhileImprime :: Test
@@ -702,6 +714,7 @@ suite = TestList
   , TestLabel "compa ge float float" testGeFloatFloat
   , TestLabel "decl int int"         testDeclIntInt
   , TestLabel "decl bool bool"       testDeclBoolBool
+  , TestLabel "decl float float"     testDeclFloatFloat
   ]
 
 main :: IO ()
