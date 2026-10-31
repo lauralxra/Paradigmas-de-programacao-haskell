@@ -789,6 +789,13 @@ testImprimeIntConvertido = TestCase $ do
   output <- runProgIO Map.empty prog43
   assertEqual "imprime 3 apos conversao" "3\n" output
 
+-- Casos de erro (aguardando autorização do professor para testar com Control.Exception):
+-- int x = verdadeiro;
+-- bool b = 5;
+-- float f = verdadeiro;
+-- bool b = 2.5;
+-- int x = 1; x = verdadeiro;
+
 -- suite completa
 
 suite :: Test
