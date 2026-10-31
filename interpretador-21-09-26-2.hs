@@ -473,6 +473,13 @@ prog34 = Block
   , Return (Var "x")
   ]
 
+-- bool b = verdadeiro; retorna b;
+prog35 :: Stmt
+prog35 = Block
+  [ Decl TBool "b" (BLit True)
+  , Return (Var "b")
+  ]
+
 -- ============================================================
 -- Suite de testes HUnit
 -- ============================================================
@@ -639,6 +646,11 @@ testDeclIntInt = TestCase $ do
   v <- runProg Map.empty prog34
   assertEqual "int x = 5" (VInt 5) v
 
+testDeclBoolBool :: Test
+testDeclBoolBool = TestCase $ do
+  v <- runProg Map.empty prog35
+  assertEqual "bool b = verdadeiro" (VBool True) v
+
 -- testes de saída impressa (usam runProgIO)
 
 testWhileImprime :: Test
@@ -689,6 +701,7 @@ suite = TestList
   , TestLabel "compa ge float int"   testGeFloatInt
   , TestLabel "compa ge float float" testGeFloatFloat
   , TestLabel "decl int int"         testDeclIntInt
+  , TestLabel "decl bool bool"       testDeclBoolBool
   ]
 
 main :: IO ()
