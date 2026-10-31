@@ -559,6 +559,13 @@ prog42 = Block
   , Return (Var "x")
   ]
 
+-- int x = 3.9; imprime(x);
+prog43 :: Stmt
+prog43 = Block
+  [ Decl TInt "x" (FLit 3.9)
+  , Print (Var "x")
+  ]
+
 -- ============================================================
 -- Suite de testes HUnit
 -- ============================================================
@@ -777,6 +784,11 @@ testImprimeCallDobro = TestCase $ do
   output <- runProgIO fenvExemplo prog8
   assertEqual "imprime dobro(4)" "8\n" output
 
+testImprimeIntConvertido :: Test
+testImprimeIntConvertido = TestCase $ do
+  output <- runProgIO Map.empty prog43
+  assertEqual "imprime 3 apos conversao" "3\n" output
+
 -- suite completa
 
 suite :: Test
@@ -823,6 +835,7 @@ suite = TestList
   , TestLabel "assign int int"       testAssignIntInt
   , TestLabel "assign float int"     testAssignFloatInt
   , TestLabel "assign int float"     testAssignIntFloat
+  , TestLabel "imprime convertido"   testImprimeIntConvertido
   ]
 
 main :: IO ()
