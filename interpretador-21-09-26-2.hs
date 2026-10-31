@@ -197,10 +197,12 @@ execStmt fenv env stmt = case stmt of
   Assign x e ->
     case Map.lookup x env of
       Nothing -> error ("Variavel nao declarada: " ++ x)
-      Just _  -> do
+      Just valorAtual -> do
         v <- evalExpr fenv env e
-        let env' = Map.insert x v env
-        return (Next env')
+        -- o Env so guarda valores: o tipo da variavel vem do valor que ela ja tem
+        let v'   = ajustaValor (tipoDoValor valorAtual) v
+            env' = Map.insert x v' env
+        v' `seq` return (Next env')
 
   If cond t f -> do
     v <- evalExpr fenv env cond
