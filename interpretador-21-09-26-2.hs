@@ -462,9 +462,13 @@ prog31 = Return (BinE Ge (Lit 3) (FLit 2.5))
 prog32 :: Stmt
 prog32 = Return (BinE Ge (FLit 2.5) (Lit 2))
 
---comparacao Ge floaqt float
+-- comparacao Ge floaqt float
 prog33 :: Stmt
 prog33 = Return (BinE Ge (FLit 2.5) (FLit 2.0))
+
+-- impressao float literal
+prog34 :: Stmt
+prog34 = Print (FLit 2.5)
 
 -- ============================================================
 -- Suite de testes HUnit
@@ -639,6 +643,11 @@ testImprimeCallDobro = TestCase $ do
   output <- runProgIO fenvExemplo prog8
   assertEqual "imprime dobro(4)" "8\n" output
 
+testImprimeFloatLiteral :: Test
+testImprimeFloatLiteral = TestCase $ do 
+  output <- runProgIO Map.empty prog34
+  assertEqual "impressao float literal" "2.5\n" output
+
 -- suite completa
 
 suite :: Test
@@ -676,6 +685,7 @@ suite = TestList
   , TestLabel "compa ge int float"   testGeIntFloat
   , TestLabel "compa ge float int"   testGeFloatInt
   , TestLabel "compa ge float float" testGeFloatFloat
+  , TestLabel "imprime float literal"   testImprimeFloatLiteral
   ]
 
 main :: IO ()
