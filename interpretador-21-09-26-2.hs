@@ -498,6 +498,10 @@ prog40 = Return (BinE Le (FLit 3.5) (Lit 3))
 prog41 :: Stmt
 prog41 = Return (BinE Ge (Lit 2) (FLit 2.5))
 
+-- igualdade mista True (2 == 2.0)
+prog42 :: Stmt
+prog42 = Return (BinE Eq (Lit 2) (FLit 2.0))
+
 -- ============================================================
 -- Suite de testes HUnit
 -- ============================================================
@@ -687,7 +691,12 @@ testLeFloatIntFalse = TestCase $ do
 testGeIntFloatFalse :: Test
 testGeIntFloatFalse = TestCase $ do 
   v <- runProg Map.empty prog41
-  assertEqual "reforco ge int e float falso" (VBool False) v    
+  assertEqual "reforco ge int e float falso" (VBool False) v   
+
+testEqIntFloatTrue :: Test
+testEqIntFloatTrue = TestCase $ do
+  v <- runProg Map.empty prog42
+  assertEqual "igualdade mista int float" (VBool True) v   
 
 -- testes de saída impressa (usam runProgIO)
 
@@ -756,6 +765,7 @@ suite = TestList
   , TestLabel "reforco gt falso"     testGtFloatFloatFalse
   , TestLabel "reforco le falso"     testLeFloatIntFalse
   , TestLabel "reforco ge falso"     testGeIntFloatFalse
+  , TestLabel "igual mista int float" testEqIntFloatTrue
   ]
 
 main :: IO ()
