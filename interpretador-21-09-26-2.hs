@@ -462,7 +462,7 @@ prog31 = Return (BinE Ge (Lit 3) (FLit 2.5))
 prog32 :: Stmt
 prog32 = Return (BinE Ge (FLit 2.5) (Lit 2))
 
--- comparacao Ge floaqt float
+-- comparacao Ge float float
 prog33 :: Stmt
 prog33 = Return (BinE Ge (FLit 2.5) (FLit 2.0))
 
@@ -473,6 +473,30 @@ prog34 = Print (FLit 2.5)
 -- impressao divisao float
 prog35 :: Stmt
 prog35 = Print (BinE Div (Lit 5) (FLit 2.0))
+
+-- igualdade no Le (2.5 <= 2.5) 
+prog36 :: Stmt
+prog36 = Return (BinE Le (FLit 2.5) (FLit 2.5))
+
+-- igualdade no Ge (2.0 >= 2)
+prog37 :: Stmt
+prog37 = Return (BinE Ge (FLit 2.0) (Lit 2))
+
+-- Lt com Resultado False (3 < 2.5)
+prog38 :: Stmt
+prog38 = Return (BinE Lt (Lit 3) (FLit 2.5))
+
+-- Gt com Resultado False (2.0 > 2.5)
+prog39 :: Stmt
+prog39 = Return (BinE Gt (FLit 2.0) (FLit 2.5))
+
+-- Le com Resultado False (3.5 <= 3)
+prog40 :: Stmt
+prog40 = Return (BinE Le (FLit 3.5) (Lit 3))
+
+-- Ge com Resultado False (2 >= 2.5)
+prog41 :: Stmt
+prog41 = Return (BinE Ge (Lit 2) (FLit 2.5))
 
 -- ============================================================
 -- Suite de testes HUnit
@@ -635,6 +659,36 @@ testGeFloatFloat = TestCase $ do
   v <- runProg Map.empty prog33
   assertEqual "comparacao ge float e float" (VBool True) v  
 
+testLeFloatFloatEq :: Test
+testLeFloatFloatEq = TestCase $ do 
+  v <- runProg Map.empty prog36
+  assertEqual "reforco le float float igualdade" (VBool True) v 
+
+testGeFloatIntEq :: Test
+testGeFloatIntEq = TestCase $ do 
+  v <- runProg Map.empty prog37
+  assertEqual "reforco ge float int igualdade" (VBool True) v  
+
+testLtIntFloatFalse :: Test
+testLtIntFloatFalse = TestCase $ do 
+  v <- runProg Map.empty prog38
+  assertEqual "reforco lt int float falso" (VBool False) v  
+
+testGtFloatFloatFalse :: Test
+testGtFloatFloatFalse = TestCase $ do 
+  v <- runProg Map.empty prog39
+  assertEqual "reforco gt float e float falso" (VBool False) v  
+
+testLeFloatIntFalse :: Test
+testLeFloatIntFalse = TestCase $ do 
+  v <- runProg Map.empty prog40
+  assertEqual "reforco le float e int falso" (VBool False) v  
+
+testGeIntFloatFalse :: Test
+testGeIntFloatFalse = TestCase $ do 
+  v <- runProg Map.empty prog41
+  assertEqual "reforco ge int e float falso" (VBool False) v    
+
 -- testes de saída impressa (usam runProgIO)
 
 testWhileImprime :: Test
@@ -696,6 +750,12 @@ suite = TestList
   , TestLabel "compa ge float float" testGeFloatFloat
   , TestLabel "imprime float literal" testImprimeFloatLiteral
   , TestLabel "imprime div float"    testImprimeDivFloat
+  , TestLabel "reforco le igualdade" testLeFloatFloatEq
+  , TestLabel "reforco ge igualdade" testGeFloatIntEq
+  , TestLabel "reforco lt falso"     testLtIntFloatFalse
+  , TestLabel "reforco gt falso"     testGtFloatFloatFalse
+  , TestLabel "reforco le falso"     testLeFloatIntFalse
+  , TestLabel "reforco ge falso"     testGeIntFloatFalse
   ]
 
 main :: IO ()
