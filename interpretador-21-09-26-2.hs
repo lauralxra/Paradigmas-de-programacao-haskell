@@ -510,6 +510,14 @@ prog42 = Return (BinE Eq (Lit 2) (FLit 2.0))
 prog43 :: Stmt
 prog43 = Return (BinE Neq (Lit 2) (FLit 2.0))
 
+-- protecao da divisao inteira
+prog44 :: Stmt
+prog44 = Return (BinE Div (Lit 7) (Lit 2))
+
+-- protecao da soma simples entre inteiros
+prog45 :: Stmt
+prog45 = Return (BinE Add (Lit 2) (Lit 3) )
+
 -- ============================================================
 -- Suite de testes HUnit
 -- ============================================================
@@ -711,6 +719,16 @@ testNeqIntFloatFalse = TestCase $ do
   v <- runProg Map.empty prog43
   assertEqual "desigualdade mista int float" (VBool False) v
 
+testDivIntProtecao :: Test
+testDivIntProtecao = TestCase $ do
+  v <- runProg Map.empty prog44
+  assertEqual "protecao divisao inteira" (VInt 3) v
+
+testAddIntProtecao :: Test
+testAddIntProtecao = TestCase $ do
+  v <- runProg Map.empty prog45
+  assertEqual "protecao soma inteira" (VInt 5) v
+
 -- testes de saída impressa (usam runProgIO)
 
 testWhileImprime :: Test
@@ -780,6 +798,8 @@ suite = TestList
   , TestLabel "reforco ge falso"     testGeIntFloatFalse
   , TestLabel "igual mista int float" testEqIntFloatTrue
   , TestLabel "desig mista int float" testNeqIntFloatFalse
+  , TestLabel "protecao div int"     testDivIntProtecao
+  , TestLabel "protecao soma int"    testAddIntProtecao
   ]
 
 main :: IO ()
