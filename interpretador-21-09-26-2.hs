@@ -506,6 +506,10 @@ prog41 = Return (BinE Ge (Lit 2) (FLit 2.5))
 prog42 :: Stmt
 prog42 = Return (BinE Eq (Lit 2) (FLit 2.0))
 
+-- desigualdade mista False
+prog43 :: Stmt
+prog43 = Return (BinE Neq (Lit 2) (FLit 2.0))
+
 -- ============================================================
 -- Suite de testes HUnit
 -- ============================================================
@@ -700,7 +704,12 @@ testGeIntFloatFalse = TestCase $ do
 testEqIntFloatTrue :: Test
 testEqIntFloatTrue = TestCase $ do
   v <- runProg Map.empty prog42
-  assertEqual "igualdade mista int float" (VBool True) v   
+  assertEqual "igualdade mista int float" (VBool True) v  
+
+testNeqIntFloatFalse :: Test
+testNeqIntFloatFalse = TestCase $ do 
+  v <- runProg Map.empty prog43
+  assertEqual "desigualdade mista int float" (VBool False) v
 
 -- testes de saída impressa (usam runProgIO)
 
@@ -770,6 +779,7 @@ suite = TestList
   , TestLabel "reforco le falso"     testLeFloatIntFalse
   , TestLabel "reforco ge falso"     testGeIntFloatFalse
   , TestLabel "igual mista int float" testEqIntFloatTrue
+  , TestLabel "desig mista int float" testNeqIntFloatFalse
   ]
 
 main :: IO ()
