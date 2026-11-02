@@ -470,6 +470,10 @@ prog33 = Return (BinE Ge (FLit 2.5) (FLit 2.0))
 prog34 :: Stmt
 prog34 = Print (FLit 2.5)
 
+-- impressao divisao float
+prog35 :: Stmt
+prog35 = Print (BinE Div (Lit 5) (FLit 2.0))
+
 -- ============================================================
 -- Suite de testes HUnit
 -- ============================================================
@@ -648,6 +652,11 @@ testImprimeFloatLiteral = TestCase $ do
   output <- runProgIO Map.empty prog34
   assertEqual "impressao float literal" "2.5\n" output
 
+testImprimeDivFloat :: Test
+testImprimeDivFloat = TestCase $ do 
+  output <- runProgIO Map.empty prog35
+  assertEqual "impressao divisao float" "2.5\n" output
+
 -- suite completa
 
 suite :: Test
@@ -685,7 +694,8 @@ suite = TestList
   , TestLabel "compa ge int float"   testGeIntFloat
   , TestLabel "compa ge float int"   testGeFloatInt
   , TestLabel "compa ge float float" testGeFloatFloat
-  , TestLabel "imprime float literal"   testImprimeFloatLiteral
+  , TestLabel "imprime float literal" testImprimeFloatLiteral
+  , TestLabel "imprime div float"    testImprimeDivFloat
   ]
 
 main :: IO ()
