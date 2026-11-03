@@ -134,6 +134,18 @@ chamaFuncao fenv env fname args =
 atualizaMemoria :: Env -> Env -> Env -> Env
 atualizaMemoria env envParams envFinal =
   Map.union (Map.intersection env envParams) (Map.intersection envFinal env)
+
+evalArgs :: FunEnv -> Env -> [Expr] -> IO ([Value], Env)
+evalArgs _ env [] = return ([], env)
+evalArgs fenv env (Call nome argsDaChamada : resto) = do
+  (v, env1) <- chamaFuncao fenv env nome argsDaChamada
+  (vs, env2) <- evalArgs fenv env1 resto
+  return (v : vs, env2)
+evalArgs fenv env (e : resto) = do
+  v <- evalExpr fenv env e 
+  (vs, env2) <- evalArgs fenv env resto
+  return (v : vs, env2)
+
 -- ============================================================
 -- evalBinOp — permanece pura
 -- ============================================================
