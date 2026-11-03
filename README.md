@@ -1,3 +1,5 @@
+# Projeto de Paradigmas de Programação - Interpretador em Haskell
+
 ## Verificação de tipos na atribuição (Pessoa 4)
 
 ### Tabela de conversões

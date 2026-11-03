@@ -148,7 +148,11 @@ evalBinOp Div (VFloat a) (VFloat b) = VFloat (a / b)
 evalBinOp Div (VFloat a) (VInt b) = VFloat (a / fromIntegral b)
 evalBinOp Div (VInt a) (VFloat b) = VFloat (fromIntegral a / b)
 evalBinOp Mod (VInt  a) (VInt  b) = VInt  (a `mod` b)
+evalBinOp Eq  (VInt a) (VFloat b) = VBool (fromIntegral a == b)
+evalBinOp Eq  (VFloat a) (VInt b) = VBool (a == fromIntegral b)
 evalBinOp Eq  va        vb        = VBool (va == vb)
+evalBinOp Neq (VInt a) (VFloat b) = VBool (fromIntegral a /= b)
+evalBinOp Neq (VFloat a) (VInt b) = VBool (a /= fromIntegral b)
 evalBinOp Neq va        vb        = VBool (va /= vb)
 evalBinOp Lt  (VInt  a) (VInt  b) = VBool (a <  b)
 evalBinOp Lt  (VInt a) (VFloat b) = VBool (fromIntegral a < b)
@@ -489,79 +493,126 @@ prog31 = Return (BinE Ge (Lit 3) (FLit 2.5))
 prog32 :: Stmt
 prog32 = Return (BinE Ge (FLit 2.5) (Lit 2))
 
---comparacao Ge floaqt float
+-- comparacao Ge float float
 prog33 :: Stmt
 prog33 = Return (BinE Ge (FLit 2.5) (FLit 2.0))
 
--- int x = 5; retorna x;
+-- impressao float literal
 prog34 :: Stmt
-prog34 = Block
+prog34 = Print (FLit 2.5)
+
+-- impressao divisao float
+prog35 :: Stmt
+prog35 = Print (BinE Div (Lit 5) (FLit 2.0))
+
+-- igualdade no Le (2.5 <= 2.5) 
+prog36 :: Stmt
+prog36 = Return (BinE Le (FLit 2.5) (FLit 2.5))
+
+-- igualdade no Ge (2.0 >= 2)
+prog37 :: Stmt
+prog37 = Return (BinE Ge (FLit 2.0) (Lit 2))
+
+-- Lt com Resultado False (3 < 2.5)
+prog38 :: Stmt
+prog38 = Return (BinE Lt (Lit 3) (FLit 2.5))
+
+-- Gt com Resultado False (2.0 > 2.5)
+prog39 :: Stmt
+prog39 = Return (BinE Gt (FLit 2.0) (FLit 2.5))
+
+-- Le com Resultado False (3.5 <= 3)
+prog40 :: Stmt
+prog40 = Return (BinE Le (FLit 3.5) (Lit 3))
+
+-- Ge com Resultado False (2 >= 2.5)
+prog41 :: Stmt
+prog41 = Return (BinE Ge (Lit 2) (FLit 2.5))
+
+-- igualdade mista True (2 == 2.0)
+prog42 :: Stmt
+prog42 = Return (BinE Eq (Lit 2) (FLit 2.0))
+
+-- desigualdade mista False
+prog43 :: Stmt
+prog43 = Return (BinE Neq (Lit 2) (FLit 2.0))
+
+-- protecao da divisao inteira
+prog44 :: Stmt
+prog44 = Return (BinE Div (Lit 7) (Lit 2))
+
+-- protecao da soma simples entre inteiros
+prog45 :: Stmt
+prog45 = Return (BinE Add (Lit 2) (Lit 3) )
+-- int x = 5; retorna x;
+prog46 :: Stmt
+prog46 = Block
   [ Decl TInt "x" (Lit 5)
   , Return (Var "x")
   ]
 
 -- bool b = verdadeiro; retorna b;
-prog35 :: Stmt
-prog35 = Block
+prog47 :: Stmt
+prog47 = Block
   [ Decl TBool "b" (BLit True)
   , Return (Var "b")
   ]
 
 -- float f = 1.5; retorna f;
-prog36 :: Stmt
-prog36 = Block
+prog48 :: Stmt
+prog48 = Block
   [ Decl TFloat "f" (FLit 1.5)
   , Return (Var "f")
   ]
 
 -- float f = 2; retorna f;
-prog37 :: Stmt
-prog37 = Block
+prog49 :: Stmt
+prog49 = Block
   [ Decl TFloat "f" (Lit 2)
   , Return (Var "f")
   ]
 
 -- int x = 3.9; retorna x;
-prog38 :: Stmt
-prog38 = Block
+prog50 :: Stmt
+prog50 = Block
   [ Decl TInt "x" (FLit 3.9)
   , Return (Var "x")
   ]
 
 -- int x = -3.9; retorna x;
-prog39 :: Stmt
-prog39 = Block
+prog51 :: Stmt
+prog51 = Block
   [ Decl TInt "x" (FLit (-3.9))
   , Return (Var "x")
   ]
 
 -- int x = 1; x = 7; retorna x;
-prog40 :: Stmt
-prog40 = Block
+prog52 :: Stmt
+prog52 = Block
   [ Decl TInt "x" (Lit 1)
   , Assign "x" (Lit 7)
   , Return (Var "x")
   ]
 
 -- float f = 1.0; f = 2; retorna f;
-prog41 :: Stmt
-prog41 = Block
+prog53 :: Stmt
+prog53 = Block
   [ Decl TFloat "f" (FLit 1.0)
   , Assign "f" (Lit 2)
   , Return (Var "f")
   ]
 
 -- int x = 0; x = 3.9; retorna x;
-prog42 :: Stmt
-prog42 = Block
+prog54 :: Stmt
+prog54 = Block
   [ Decl TInt "x" (Lit 0)
   , Assign "x" (FLit 3.9)
   , Return (Var "x")
   ]
 
 -- int x = 3.9; imprime(x);
-prog43 :: Stmt
-prog43 = Block
+prog55 :: Stmt
+prog55 = Block
   [ Decl TInt "x" (FLit 3.9)
   , Print (Var "x")
   ]
@@ -727,49 +778,98 @@ testGeFloatFloat = TestCase $ do
   v <- runProg Map.empty prog33
   assertEqual "comparacao ge float e float" (VBool True) v  
 
+testLeFloatFloatEq :: Test
+testLeFloatFloatEq = TestCase $ do 
+  v <- runProg Map.empty prog36
+  assertEqual "reforco le float float igualdade" (VBool True) v 
+
+testGeFloatIntEq :: Test
+testGeFloatIntEq = TestCase $ do 
+  v <- runProg Map.empty prog37
+  assertEqual "reforco ge float int igualdade" (VBool True) v  
+
+testLtIntFloatFalse :: Test
+testLtIntFloatFalse = TestCase $ do 
+  v <- runProg Map.empty prog38
+  assertEqual "reforco lt int float falso" (VBool False) v  
+
+testGtFloatFloatFalse :: Test
+testGtFloatFloatFalse = TestCase $ do 
+  v <- runProg Map.empty prog39
+  assertEqual "reforco gt float e float falso" (VBool False) v  
+
+testLeFloatIntFalse :: Test
+testLeFloatIntFalse = TestCase $ do 
+  v <- runProg Map.empty prog40
+  assertEqual "reforco le float e int falso" (VBool False) v  
+
+testGeIntFloatFalse :: Test
+testGeIntFloatFalse = TestCase $ do 
+  v <- runProg Map.empty prog41
+  assertEqual "reforco ge int e float falso" (VBool False) v   
+
+testEqIntFloatTrue :: Test
+testEqIntFloatTrue = TestCase $ do
+  v <- runProg Map.empty prog42
+  assertEqual "igualdade mista int float" (VBool True) v  
+
+testNeqIntFloatFalse :: Test
+testNeqIntFloatFalse = TestCase $ do 
+  v <- runProg Map.empty prog43
+  assertEqual "desigualdade mista int float" (VBool False) v
+
+testDivIntProtecao :: Test
+testDivIntProtecao = TestCase $ do
+  v <- runProg Map.empty prog44
+  assertEqual "protecao divisao inteira" (VInt 3) v
+
+testAddIntProtecao :: Test
+testAddIntProtecao = TestCase $ do
+  v <- runProg Map.empty prog45
+  assertEqual "protecao soma inteira" (VInt 5) v
 testDeclIntInt :: Test
 testDeclIntInt = TestCase $ do
-  v <- runProg Map.empty prog34
+  v <- runProg Map.empty prog46
   assertEqual "int x = 5" (VInt 5) v
 
 testDeclBoolBool :: Test
 testDeclBoolBool = TestCase $ do
-  v <- runProg Map.empty prog35
+  v <- runProg Map.empty prog47
   assertEqual "bool b = verdadeiro" (VBool True) v
 
 testDeclFloatFloat :: Test
 testDeclFloatFloat = TestCase $ do
-  v <- runProg Map.empty prog36
+  v <- runProg Map.empty prog48
   assertEqual "float f = 1.5" (VFloat 1.5) v
 
 testDeclFloatInt :: Test
 testDeclFloatInt = TestCase $ do
-  v <- runProg Map.empty prog37
+  v <- runProg Map.empty prog49
   assertEqual "float f = 2 vira 2.0" (VFloat 2.0) v
 
 testDeclIntFloat :: Test
 testDeclIntFloat = TestCase $ do
-  v <- runProg Map.empty prog38
+  v <- runProg Map.empty prog50
   assertEqual "int x = 3.9 vira 3" (VInt 3) v
 
 testDeclIntFloatNegativo :: Test
 testDeclIntFloatNegativo = TestCase $ do
-  v <- runProg Map.empty prog39
+  v <- runProg Map.empty prog51
   assertEqual "int x = -3.9 vira -3" (VInt (-3)) v
 
 testAssignIntInt :: Test
 testAssignIntInt = TestCase $ do
-  v <- runProg Map.empty prog40
+  v <- runProg Map.empty prog52
   assertEqual "x = 7" (VInt 7) v
 
 testAssignFloatInt :: Test
 testAssignFloatInt = TestCase $ do
-  v <- runProg Map.empty prog41
+  v <- runProg Map.empty prog53
   assertEqual "f = 2 vira 2.0" (VFloat 2.0) v
 
 testAssignIntFloat :: Test
 testAssignIntFloat = TestCase $ do
-  v <- runProg Map.empty prog42
+  v <- runProg Map.empty prog54
   assertEqual "x = 3.9 vira 3" (VInt 3) v
 
 -- testes de saída impressa (usam runProgIO)
@@ -784,9 +884,18 @@ testImprimeCallDobro = TestCase $ do
   output <- runProgIO fenvExemplo prog8
   assertEqual "imprime dobro(4)" "8\n" output
 
+testImprimeFloatLiteral :: Test
+testImprimeFloatLiteral = TestCase $ do 
+  output <- runProgIO Map.empty prog34
+  assertEqual "impressao float literal" "2.5\n" output
+
+testImprimeDivFloat :: Test
+testImprimeDivFloat = TestCase $ do 
+  output <- runProgIO Map.empty prog35
+  assertEqual "impressao divisao float" "2.5\n" output
 testImprimeIntConvertido :: Test
 testImprimeIntConvertido = TestCase $ do
-  output <- runProgIO Map.empty prog43
+  output <- runProgIO Map.empty prog55
   assertEqual "imprime 3 apos conversao" "3\n" output
 
 -- Casos de erro (aguardando autorização do professor para testar com Control.Exception):
@@ -833,6 +942,18 @@ suite = TestList
   , TestLabel "compa ge int float"   testGeIntFloat
   , TestLabel "compa ge float int"   testGeFloatInt
   , TestLabel "compa ge float float" testGeFloatFloat
+  , TestLabel "imprime float literal" testImprimeFloatLiteral
+  , TestLabel "imprime div float"    testImprimeDivFloat
+  , TestLabel "reforco le igualdade" testLeFloatFloatEq
+  , TestLabel "reforco ge igualdade" testGeFloatIntEq
+  , TestLabel "reforco lt falso"     testLtIntFloatFalse
+  , TestLabel "reforco gt falso"     testGtFloatFloatFalse
+  , TestLabel "reforco le falso"     testLeFloatIntFalse
+  , TestLabel "reforco ge falso"     testGeIntFloatFalse
+  , TestLabel "igual mista int float" testEqIntFloatTrue
+  , TestLabel "desig mista int float" testNeqIntFloatFalse
+  , TestLabel "protecao div int"     testDivIntProtecao
+  , TestLabel "protecao soma int"    testAddIntProtecao
   , TestLabel "decl int int"         testDeclIntInt
   , TestLabel "decl bool bool"       testDeclBoolBool
   , TestLabel "decl float float"     testDeclFloatFloat
