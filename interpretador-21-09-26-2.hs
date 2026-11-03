@@ -541,6 +541,13 @@ progGlobal = Block
   , Return (Call "usaGlobal" [Lit 1])
   ]
 
+-- int x = 100; retorna dobro(5)
+progParamVence :: Stmt
+progParamVence = Block
+  [ Decl TInt "x" (Lit 100)
+  , Return (Call "dobro" [Lit 5])
+  ]
+
 -- ============================================================
 -- Suite de testes HUnit
 -- ============================================================
@@ -757,6 +764,11 @@ testLeGlobal = TestCase $ do
   v <- runProg fenvFuncoes progGlobal
   assertEqual "funcao le variavel global" (VInt 11) v
 
+testParamVence :: Test
+testParamVence = TestCase $ do
+  v <- runProg fenvFuncoes progParamVence
+  assertEqual "parametro vence variavel de fora" (VInt 10) v
+
 -- testes de saída impressa (usam runProgIO)
 
 testWhileImprime :: Test
@@ -829,6 +841,7 @@ suite = TestList
   , TestLabel "protecao div int"     testDivIntProtecao
   , TestLabel "protecao soma int"    testAddIntProtecao
   , TestLabel "le global" testLeGlobal
+  , TestLabel "param vence" testParamVence
   ]
 
 main :: IO ()
