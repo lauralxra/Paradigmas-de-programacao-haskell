@@ -303,12 +303,20 @@ funSoma = FunDecl
   , funBody   = Return (BinE Add (Var "a") (Var "b"))
   }
 
-  -- int usaGlobal (int x) { retorna x + g; }
+-- int usaGlobal (int x) { retorna x + g; }
 funUsaGlobal :: FunDecl
 funUsaGlobal = FunDecl
   { funName   = "usaGlobal"
   , funParams = [(TInt, "x")]
   , funBody   = Return (BinE Add (Var "x") (Var "g"))
+  }
+
+-- int incrementa() { g = g + 1; retorna g;}
+funIncrementa :: FunDecl
+funIncrementa = FunDecl
+  { funName   = "incrementa"
+  , funParams = []
+  , funBody   = Block [Assign "g" (BinE Add (Var "g") (Lit 1)), Return (Var "g")]
   }
 
 fenvExemplo :: FunEnv
@@ -324,6 +332,7 @@ fenvFuncoes = Map.fromList
   , ("fatorial", funFatorial)
   , ("soma",     funSoma)
   , ("usaGlobal", funUsaGlobal)
+  , ("incrementa", funIncrementa)
   ]
 
 -- ============================================================
@@ -548,6 +557,13 @@ progParamVence = Block
   , Return (Call "dobro" [Lit 5])
   ]
 
+-- int g = 0; retorna soma(incrementa(), g)
+progIncrementa :: Stmt
+progIncrementa = Block
+  [ Decl TInt "g" (Lit 0)
+  , Return (Call "soma" [Call "incrementa" [], Var "g"])
+  ]
+
 -- ============================================================
 -- Suite de testes HUnit
 -- ============================================================
@@ -769,6 +785,11 @@ testParamVence = TestCase $ do
   v <- runProg fenvFuncoes progParamVence
   assertEqual "parametro vence variavel de fora" (VInt 10) v
 
+testArgVeGlobal :: Test
+testArgVeGlobal = TestCase $ do
+  v <- runProg fenvFuncoes progIncrementa
+  assertEqual "argumento ve global atualizada" (VInt 2) v
+
 -- testes de saída impressa (usam runProgIO)
 
 testWhileImprime :: Test
@@ -842,6 +863,7 @@ suite = TestList
   , TestLabel "protecao soma int"    testAddIntProtecao
   , TestLabel "le global" testLeGlobal
   , TestLabel "param vence" testParamVence
+  , TestLabel "arg ve global" testArgVeGlobal
   ]
 
 main :: IO ()
