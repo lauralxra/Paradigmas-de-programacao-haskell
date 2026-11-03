@@ -303,11 +303,27 @@ funSoma = FunDecl
   , funBody   = Return (BinE Add (Var "a") (Var "b"))
   }
 
+  -- int usaGlobal (int x) { retorna x + g; }
+funUsaGlobal :: FunDecl
+funUsaGlobal = FunDecl
+  { funName   = "usaGlobal"
+  , funParams = [(TInt, "x")]
+  , funBody   = Return (BinE Add (Var "x") (Var "g"))
+  }
+
 fenvExemplo :: FunEnv
 fenvExemplo = Map.fromList
   [ ("dobro",    funDobro)
   , ("fatorial", funFatorial)
   , ("soma",     funSoma)
+  ]
+
+fenvFuncoes :: FunEnv
+fenvFuncoes = Map.fromList
+  [ ("dobro",    funDobro)
+  , ("fatorial", funFatorial)
+  , ("soma",     funSoma)
+  , ("usaGlobal", funUsaGlobal)
   ]
 
 -- ============================================================
@@ -517,6 +533,13 @@ prog44 = Return (BinE Div (Lit 7) (Lit 2))
 -- protecao da soma simples entre inteiros
 prog45 :: Stmt
 prog45 = Return (BinE Add (Lit 2) (Lit 3) )
+
+-- int g = 10; retorna usaGlobal(1)
+progGlobal :: Stmt
+progGlobal = Block
+  [ Decl TInt "g" (Lit 10)
+  , Return (Call "usaGlobal" [Lit 1])
+  ]
 
 -- ============================================================
 -- Suite de testes HUnit
@@ -729,6 +752,11 @@ testAddIntProtecao = TestCase $ do
   v <- runProg Map.empty prog45
   assertEqual "protecao soma inteira" (VInt 5) v
 
+testLeGlobal :: Test
+testLeGlobal = TestCase $ do
+  v <- runProg fenvFuncoes progGlobal
+  assertEqual "funcao le variavel global" (VInt 11) v
+
 -- testes de saída impressa (usam runProgIO)
 
 testWhileImprime :: Test
@@ -800,6 +828,7 @@ suite = TestList
   , TestLabel "desig mista int float" testNeqIntFloatFalse
   , TestLabel "protecao div int"     testDivIntProtecao
   , TestLabel "protecao soma int"    testAddIntProtecao
+  , TestLabel "le global" testLeGlobal
   ]
 
 main :: IO ()
