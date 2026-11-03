@@ -638,6 +638,14 @@ prog58 = Block
   , Return (Var "f")
   ]
 
+-- float f = 0.0; f = 1 + 2; retorna f;
+prog59 :: Stmt
+prog59 = Block
+  [ Decl TFloat "f" (FLit 0.0)
+  , Assign "f" (BinE Add (Lit 1) (Lit 2))
+  , Return (Var "f")
+  ]
+
 -- ============================================================
 -- Suite de testes HUnit
 -- ============================================================
@@ -908,6 +916,11 @@ testDeclFloatDivInteira = TestCase $ do
   v <- runProg Map.empty prog58
   assertEqual "float f = 5 / 2 vira 2.0" (VFloat 2.0) v
 
+testAssignFloatSomaInteira :: Test
+testAssignFloatSomaInteira = TestCase $ do
+  v <- runProg Map.empty prog59
+  assertEqual "f = 1 + 2 vira 3.0" (VFloat 3.0) v
+
 -- testes de saída impressa (usam runProgIO)
 
 testWhileImprime :: Test
@@ -1003,6 +1016,7 @@ suite = TestList
   , TestLabel "decl int soma mista"  testDeclIntSomaMista
   , TestLabel "decl int div mista"   testDeclIntDivMista
   , TestLabel "decl float div int"   testDeclFloatDivInteira
+  , TestLabel "assign float soma int" testAssignFloatSomaInteira
   ]
 
 main :: IO ()
