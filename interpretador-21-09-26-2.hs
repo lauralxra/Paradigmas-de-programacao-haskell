@@ -107,7 +107,12 @@ evalExpr fenv env expr = case expr of
     vr <- evalExpr fenv env r
     return (evalBinOp op vl vr)
 
-  Call fname args ->
+  Call fname args -> do 
+    (v, _) <- chamaFuncao fenv env fname args
+    return v 
+    
+chamaFuncao :: FunEnv -> Env -> String -> [Expr] -> IO (Value, Env)
+chamaFuncao fenv env fname args = 
     case Map.lookup fname fenv of
       Nothing  -> error ("Funcao nao declarada: " ++ fname)
       Just fun -> do
@@ -123,8 +128,8 @@ evalExpr fenv env expr = case expr of
                 envLocal = Map.union (Map.fromList (zip params vals)) env
             result <- execStmt fenv envLocal (funBody fun)
             case result of
-              Returned v _ -> return v
-              Next _       -> return VVoid
+              Returned v _ -> return (v, env)
+              Next _       -> return (VVoid, env)
 
 -- ============================================================
 -- evalBinOp — permanece pura
