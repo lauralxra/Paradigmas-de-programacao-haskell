@@ -120,7 +120,7 @@ evalExpr fenv env expr = case expr of
           else do
             vals <- mapM (evalExpr fenv env) args
             let params   = map snd (funParams fun)
-                envLocal = Map.fromList (zip params vals)
+                envLocal = Map.union (Map.fromList (zip params vals)) env
             result <- execStmt fenv envLocal (funBody fun)
             case result of
               Returned v _ -> return v
