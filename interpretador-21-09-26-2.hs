@@ -123,14 +123,15 @@ chamaFuncao fenv env fname args =
                       show nparams ++ " argumentos, recebeu " ++
                       show nargs)
           else do
-            vals <- mapM (evalExpr fenv env) args
+            
+            (vals, envArgs) <- evalArgs fenv env args 
             let params   = map snd (funParams fun)
-                envLocal = Map.union (Map.fromList (zip params vals)) env
+                envLocal = Map.union (Map.fromList (zip params vals)) envArgs
                 envParams = Map.fromList (zip params vals) 
             result <- execStmt fenv envLocal (funBody fun)
             case result of
-              Returned v envFinal -> return (v, atualizaMemoria env envParams envFinal)
-              Next envFinal       -> return (VVoid, atualizaMemoria env envParams envFinal)
+              Returned v envFinal -> return (v, atualizaMemoria envArgs envParams envFinal)
+              Next envFinal       -> return (VVoid, atualizaMemoria envArgs envParams envFinal)
 atualizaMemoria :: Env -> Env -> Env -> Env
 atualizaMemoria env envParams envFinal =
   Map.union (Map.intersection env envParams) (Map.intersection envFinal env)
