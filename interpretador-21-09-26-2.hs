@@ -126,11 +126,14 @@ chamaFuncao fenv env fname args =
             vals <- mapM (evalExpr fenv env) args
             let params   = map snd (funParams fun)
                 envLocal = Map.union (Map.fromList (zip params vals)) env
+                envParams = Map.fromList (zip params vals) 
             result <- execStmt fenv envLocal (funBody fun)
             case result of
-              Returned v _ -> return (v, env)
-              Next _       -> return (VVoid, env)
-
+              Returned v envFinal -> return (v, atualizaMemoria env envParams envFinal)
+              Next envFinal       -> return (VVoid, atualizaMemoria env envParams envFinal)
+atualizaMemoria :: Env -> Env -> Env -> Env
+atualizaMemoria env envParams envFinal =
+  Map.union (Map.intersection env envParams) (Map.intersection envFinal env)
 -- ============================================================
 -- evalBinOp — permanece pura
 -- ============================================================
