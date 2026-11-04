@@ -807,6 +807,10 @@ prog65 = Return (Call "metade" [Lit 5])
 prog66 :: Stmt
 prog66 = Return (Call "dobro" [FLit 2.7])
 
+-- retorna soma(1.5, 2.5);   (os dois parametros int: 1 + 2)
+prog67 :: Stmt
+prog67 = Return (Call "soma" [FLit 1.5, FLit 2.5])
+
 -- arrays 
 progArrayInt :: Stmt
 progArrayInt = Block
@@ -1151,6 +1155,11 @@ testParamIntRecebeFloat = TestCase $ do
   v <- runProg fenvExemplo prog66
   assertEqual "dobro(2.7) com x int da 4" (VInt 4) v
 
+testParamsIntRecebemFloat :: Test
+testParamsIntRecebemFloat = TestCase $ do
+  v <- runProg fenvExemplo prog67
+  assertEqual "soma(1.5, 2.5) com a e b int da 3" (VInt 3) v
+
 -- arrays
 ---- Testa a inicialização de um array de inteiros.
 testArrayInt :: Test
@@ -1288,6 +1297,7 @@ suite = TestList
   , TestLabel "imprime array convertido" testImprimeArrayFloatConvertido
   , TestLabel "param float recebe int" testParamFloatRecebeInt
   , TestLabel "param int recebe float" testParamIntRecebeFloat
+  , TestLabel "params int recebem float" testParamsIntRecebemFloat
   , TestLabel "array Int" testArrayInt
   , TestLabel "array Bool" testArrayBool
   , TestLabel "array Float" testArrayFloat
