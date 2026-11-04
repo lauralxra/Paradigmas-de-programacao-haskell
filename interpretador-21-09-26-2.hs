@@ -49,6 +49,10 @@ data Stmt
   | Return Expr                -- return x + y
   | Print  Expr                -- printf (10)
   | Skip
+  | DeclArray Type String Int -- Declara um array: tipo, nomee tamanho (por isso ta Int , porque é um array unidimensional)
+  -- por exemplo em de acordo com a IA - int numeros[3] → DeclArray TInt "numeros" 3 (usando a linguagem c como referencia)
+  | AssignIndex String Expr Expr -- Altera uma posição para um outro valor : nome, indece e novo valor 
+  -- outro exemplo para explicar como funciona essa expressão, numeros[1] = 10 → AssignIndex "numeros" (Lit 1) (Lit 10)
   deriving (Show, Eq)
 
 data FunDecl = FunDecl
@@ -67,6 +71,7 @@ data Value
   | VBool Bool
   | VVoid
   | VFloat Float
+  | VArray [Value] --representa os elementos do Arrays
   deriving (Show, Eq)
 
 -- variaveis no escopo do programa
@@ -74,6 +79,8 @@ type Env    = Map String Value
 
 -- funções no escopo do programa
 type FunEnv = Map String FunDecl
+
+--Adição de funções auxiliares (essas funções ajudam a inicializar , consultar e modificar os arrays)
 
 -- ============================================================
 -- Resultado da execução de um Stmt
