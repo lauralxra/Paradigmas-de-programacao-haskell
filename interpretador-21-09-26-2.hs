@@ -19,6 +19,7 @@ data Type
   | TBool
   | TVoid
   | TFloat
+  | TArray Type -- representa um tipo array , como array de Int ou Bool, mas podemos colocar float , por exemplo TArray TFloat
   deriving (Show, Eq)
 
 data BinOp
@@ -35,6 +36,8 @@ data Expr
   | Not   Expr
   | Call  String [Expr]
   | FLit Float
+  | Index String Expr --Acesso a uma posição: numeros[2]
+  -- ainda sobre a adição dessa expressação do indíce do array , o primeiro argumento é o nome do array; o segundo é a expressão que calcula o índice.
   deriving (Show, Eq)
 
 data Stmt
@@ -46,6 +49,10 @@ data Stmt
   | Return Expr                -- return x + y
   | Print  Expr                -- printf (10)
   | Skip
+  | DeclArray Type String Int -- Declara um array: tipo, nomee tamanho (por isso ta Int , porque é um array unidimensional)
+  -- por exemplo em de acordo com a IA - int numeros[3] → DeclArray TInt "numeros" 3 (usando a linguagem c como referencia)
+  | AssignIndex String Expr Expr -- Altera uma posição para um outro valor : nome, indece e novo valor 
+  -- outro exemplo para explicar como funciona essa expressão, numeros[1] = 10 → AssignIndex "numeros" (Lit 1) (Lit 10)
   deriving (Show, Eq)
 
 data FunDecl = FunDecl
@@ -64,6 +71,7 @@ data Value
   | VBool Bool
   | VVoid
   | VFloat Float
+  | VArray [Value] --representa os elementos do Arrays
   deriving (Show, Eq)
 
 -- variaveis no escopo do programa
@@ -71,6 +79,36 @@ type Env    = Map String Value
 
 -- funções no escopo do programa
 type FunEnv = Map String FunDecl
+
+--Adição de funções auxiliares (essas funções ajudam a inicializar , consultar e modificar os arrays) --
+-- Retorna o valor inicial de cada tipo de elemento. pararecido com : int nome[5] =0;
+-- Int começa em 0, Bool em False e Float em 0.0.
+defaultArrayValue :: Type -> Value
+defaultArrayValue TInt   = VInt 0
+defaultArrayValue TBool  = VBool False
+defaultArrayValue TFloat = VFloat 0.0
+defaultArrayValue _      = error "Tipo invalido para elemento de array"
+
+--Nessa função o objetivo é para buscar um elemnto em uma lista usando seu indice , ou seja, recebe o índice e a lista, devolvendo o valor daquela posição.
+-- Além de verificar se o indice é negativo ou ultrapassa o tamanho
+getArrayElement :: Int -> [Value] -> Value
+getArrayElement index values
+  | index < 0 = error "Indice negativo em array"
+  | otherwise =
+      case drop index values of
+        value : _ -> value
+        []        -> error "Indice fora dos limites do array"
+
+
+--Essa função substitui um elemento sem alterar as demais posições.
+--divide a lista antes e depois do índice e monta uma nova lista com o valor atualizado.(essa foi mais dificil de entender como ficaria)
+setArrayElement :: Int -> Value -> [Value] -> [Value]
+setArrayElement index newValue values
+  | index < 0 = error "Indice negativo em array"
+  | otherwise =
+      case splitAt index values of    -- parecido com switch em c.
+        (before, _ : after) -> before ++ (newValue : after)
+        _                   -> error "Indice fora dos limites do array"
 
 -- ============================================================
 -- Resultado da execução de um Stmt
@@ -110,6 +148,20 @@ evalExpr fenv env expr = case expr of
   Call fname args -> do 
     (v, _) <- chamaFuncao fenv env fname args
     return v 
+  -- a entrada para essa consulta é Index "numeros" (Lit 1)
+  Index name indexExpr -> do -- essa expressão é para acessa uma posição de um array: numeros[1]
+    indexValue <- evalExpr fenv env indexExpr
+    case indexValue of 
+      VInt i -> 
+        case Map.lookup name env of 
+          Nothing ->
+            error ("Array não declarado: " ++ name)
+          Just (VArray values) ->
+            return (getArrayElement i values)
+          Just _ ->
+            error "Variável não é um array"
+      _ -> 
+        error "Indice do array deve ser inteiro"
     
 chamaFuncao :: FunEnv -> Env -> String -> [Expr] -> IO (Value, Env)
 chamaFuncao fenv env fname args = 
@@ -146,6 +198,9 @@ evalArgs fenv env (e : resto) = do
   v <- evalExpr fenv env e 
   (vs, env2) <- evalArgs fenv env resto
   return (v : vs, env2)
+
+
+
 
 -- ============================================================
 -- evalBinOp — permanece pura
@@ -249,6 +304,38 @@ execStmt fenv env stmt = case stmt of
           Next        env' -> execStmt fenv env' (While cond body)
       _ -> error "Condicao do While nao eh booleana"
 
+    -- Declara um array e inicializa todas as posições.(Laura)
+  DeclArray ty name size ->
+    if size < 0
+      then error "Tamanho negativo para array"
+      else do
+
+        let initialValues = replicate size (defaultArrayValue ty)
+        let env' = Map.insert name (VArray initialValues) env
+
+        return (Next env')
+
+
+  -- Modifica uma posição específica do array. (Laura)
+  AssignIndex name indexExpr valueExpr ->
+    case Map.lookup name env of
+      Nothing ->
+        error ("Array nao declarado: " ++ name)
+      Just (VArray values) -> do
+        indexValue <- evalExpr fenv env indexExpr
+        newValue <- evalExpr fenv env valueExpr
+        case indexValue of
+          VInt index -> do
+            let updatedValues =
+                  setArrayElement index newValue values
+            let env' =
+                  Map.insert name (VArray updatedValues) env
+            return (Next env')
+          _ ->
+            error "Indice do array deve ser inteiro"
+      Just _ ->
+        error "Variavel nao eh um array"
+
 -- ============================================================
 -- Execução de um bloco
 -- ============================================================
@@ -270,6 +357,13 @@ showValue (VInt  n) = show n
 showValue (VFloat n) = show n
 showValue (VBool b) = if b then "verdadeiro" else "falso"
 showValue VVoid     = "()"
+showValue (VArray values) = -- laura
+  "[" ++ joinValues values ++ "]"
+joinValues :: [Value] -> String
+joinValues [] = ""
+joinValues [value] = showValue value
+joinValues (value : rest) =
+  showValue value ++ ", " ++ joinValues rest
 
 -- ============================================================
 -- Auxiliares para testes
@@ -585,6 +679,40 @@ progIncrementa = Block
   , Return (Call "soma" [Call "incrementa" [], Var "g"])
   ]
 
+-- arrays 
+progArrayInt :: Stmt
+progArrayInt = Block
+  [ DeclArray TInt "numeros" 3
+  , Return (Index "numeros" (Lit 1))
+  ]
+
+progArrayBool :: Stmt
+progArrayBool = Block
+ [ DeclArray TBool "respostas" 2
+  , Return (Index "respostas" (Lit 0))
+  ]
+
+progArrayFloat :: Stmt
+progArrayFloat = Block
+ [ DeclArray TFloat "notas" 3
+  , Return (Index "notas" (Lit 2))
+  ]
+
+progArrayAssign :: Stmt
+progArrayAssign = Block
+  [ DeclArray TInt "numeros" 3
+  , AssignIndex "numeros" (Lit 1) (Lit 99)
+  , Return (Index "numeros" (Lit 1))
+  ]
+
+progArrayPrint :: Stmt
+progArrayPrint = Block
+ [ DeclArray TInt "numeros" 3
+  , AssignIndex "numeros" (Lit 0) (Lit 10)
+  , AssignIndex "numeros" (Lit 1) (Lit 20)
+  , AssignIndex "numeros" (Lit 2) (Lit 30)
+  , Print (Var "numeros")
+  ]
 -- ============================================================
 -- Suite de testes HUnit
 -- ============================================================
@@ -810,6 +938,37 @@ testArgVeGlobal :: Test
 testArgVeGlobal = TestCase $ do
   v <- runProg fenvFuncoes progIncrementa
   assertEqual "argumento ve global atualizada" (VInt 2) v
+-- arrays
+---- Testa a inicialização de um array de inteiros.
+testArrayInt :: Test
+testArrayInt = TestCase $ do
+  v <- runProg Map.empty progArrayInt
+  assertEqual "array Int inicia com zero" (VInt 0) v
+
+-- Testa a inicialização de um array de booleanos.
+testArrayBool :: Test
+testArrayBool = TestCase $ do
+  v <- runProg Map.empty progArrayBool
+  assertEqual "array Bool inicia com False" (VBool False) v
+
+-- Testa a inicialização de um array de floats.
+testArrayFloat :: Test
+testArrayFloat = TestCase $ do
+  v <- runProg Map.empty progArrayFloat
+  assertEqual "array Float inicia com 0.0" (VFloat 0.0) v
+
+-- Testa a alteração de um elemento.
+testArrayAssign :: Test
+testArrayAssign = TestCase $ do
+  v <- runProg Map.empty progArrayAssign
+  assertEqual "altera a posicao 1" (VInt 99) v
+
+-- Testa a impressão do array completo.
+testArrayPrint :: Test
+testArrayPrint = TestCase $ do
+  output <- runProgIO Map.empty progArrayPrint
+  assertEqual "imprime os elementos do array"
+    "[10, 20, 30]\n" output
 
 -- testes de saída impressa (usam runProgIO)
 
@@ -885,6 +1044,11 @@ suite = TestList
   , TestLabel "le global" testLeGlobal
   , TestLabel "param vence" testParamVence
   , TestLabel "arg ve global" testArgVeGlobal
+  , TestLabel "array Int" testArrayInt
+  , TestLabel "array Bool" testArrayBool
+  , TestLabel "array Float" testArrayFloat
+  , TestLabel "array atribuicao" testArrayAssign
+  , TestLabel "array impressao" testArrayPrint
   ]
 
 main :: IO ()
