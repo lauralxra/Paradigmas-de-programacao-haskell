@@ -778,6 +778,15 @@ prog63 = Block
   , Return (Var "x")
   ]
 
+-- float notas[3]; notas[0] = 1; notas[1] = 2; imprime(notas);
+prog64 :: Stmt
+prog64 = Block
+  [ DeclArray TFloat "notas" 3
+  , AssignIndex "notas" (Lit 0) (Lit 1)
+  , AssignIndex "notas" (Lit 1) (Lit 2)
+  , Print (Var "notas")
+  ]
+
 -- arrays 
 progArrayInt :: Stmt
 progArrayInt = Block
@@ -1107,6 +1116,11 @@ testDeclIntComElementoFloat = TestCase $ do
   v <- runProg Map.empty prog63
   assertEqual "int x = notas[0] (2.5) vira 2" (VInt 2) v
 
+testImprimeArrayFloatConvertido :: Test
+testImprimeArrayFloatConvertido = TestCase $ do
+  output <- runProgIO Map.empty prog64
+  assertEqual "imprime array float apos conversao" "[1.0, 2.0, 0.0]\n" output
+
 -- arrays
 ---- Testa a inicialização de um array de inteiros.
 testArrayInt :: Test
@@ -1241,6 +1255,7 @@ suite = TestList
   , TestLabel "array int recebe float" testArrayIntRecebeFloat
   , TestLabel "array int float neg"   testArrayIntRecebeFloatNegativo
   , TestLabel "decl int elemento float" testDeclIntComElementoFloat
+  , TestLabel "imprime array convertido" testImprimeArrayFloatConvertido
   , TestLabel "array Int" testArrayInt
   , TestLabel "array Bool" testArrayBool
   , TestLabel "array Float" testArrayFloat
