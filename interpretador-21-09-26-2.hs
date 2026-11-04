@@ -1226,6 +1226,7 @@ testImprimeIntConvertido = TestCase $ do
 -- int x = 1; x = verdadeiro;
 -- bool r[2]; r[0] = 5;
 -- int a[2]; a = 5;
+-- bool f(bool b) { ... }  f(5);
 
 -- suite completa
 
