@@ -769,6 +769,15 @@ prog62 = Block
   , Return (Index "numeros" (Lit 2))
   ]
 
+-- float notas[2]; notas[0] = 2.5; int x = notas[0]; return x;
+prog63 :: Stmt
+prog63 = Block
+  [ DeclArray TFloat "notas" 2
+  , AssignIndex "notas" (Lit 0) (FLit 2.5)
+  , Decl TInt "x" (Index "notas" (Lit 0))
+  , Return (Var "x")
+  ]
+
 -- arrays 
 progArrayInt :: Stmt
 progArrayInt = Block
@@ -1093,6 +1102,11 @@ testArrayIntRecebeFloatNegativo = TestCase $ do
   v <- runProg Map.empty prog62
   assertEqual "numeros[2] = -3.9 vira -3" (VInt (-3)) v
 
+testDeclIntComElementoFloat :: Test
+testDeclIntComElementoFloat = TestCase $ do
+  v <- runProg Map.empty prog63
+  assertEqual "int x = notas[0] (2.5) vira 2" (VInt 2) v
+
 -- arrays
 ---- Testa a inicialização de um array de inteiros.
 testArrayInt :: Test
@@ -1226,6 +1240,7 @@ suite = TestList
   , TestLabel "array float recebe int" testArrayFloatRecebeInt
   , TestLabel "array int recebe float" testArrayIntRecebeFloat
   , TestLabel "array int float neg"   testArrayIntRecebeFloatNegativo
+  , TestLabel "decl int elemento float" testDeclIntComElementoFloat
   , TestLabel "array Int" testArrayInt
   , TestLabel "array Bool" testArrayBool
   , TestLabel "array Float" testArrayFloat
