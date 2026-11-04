@@ -80,7 +80,35 @@ type Env    = Map String Value
 -- funções no escopo do programa
 type FunEnv = Map String FunDecl
 
---Adição de funções auxiliares (essas funções ajudam a inicializar , consultar e modificar os arrays)
+--Adição de funções auxiliares (essas funções ajudam a inicializar , consultar e modificar os arrays) --
+-- Retorna o valor inicial de cada tipo de elemento. pararecido com : int nome[5] =0;
+-- Int começa em 0, Bool em False e Float em 0.0.
+defaultArrayValue :: Type -> Value
+defaultArrayValue TInt   = VInt 0
+defaultArrayValue TBool  = VBool False
+defaultArrayValue TFloat = VFloat 0.0
+defaultArrayValue _      = error "Tipo invalido para elemento de array"
+
+--Nessa função o objetivo é para buscar um elemnto em uma lista usando seu indice , ou seja, recebe o índice e a lista, devolvendo o valor daquela posição.
+-- Além de verificar se o indice é negativo ou ultrapassa o tamanho
+getArrayElement :: Int -> [Value] -> Value
+getArrayElement index values
+  | index < 0 = error "Indice negativo em array"
+  | otherwise =
+      case drop index values of
+        value : _ -> value
+        []        -> error "Indice fora dos limites do array"
+
+
+--Essa função substitui um elemento sem alterar as demais posições.
+--divide a lista antes e depois do índice e monta uma nova lista com o valor atualizado.(essa foi mais dificil de entender como ficaria)
+setArrayElement :: Int -> Value -> [Value] -> [Value]
+setArrayElement index newValue values
+  | index < 0 = error "Indice negativo em array"
+  | otherwise =
+      case splitAt index values of    -- parecido com switch em c.
+        (before, _ : after) -> before ++ (newValue : after)
+        _                   -> error "Indice fora dos limites do array"
 
 -- ============================================================
 -- Resultado da execução de um Stmt
