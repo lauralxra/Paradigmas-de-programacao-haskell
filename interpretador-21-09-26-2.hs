@@ -166,16 +166,17 @@ evalExpr fenv env expr = case expr of
   -- a entrada para essa consulta é Index "numeros" (Lit 1)
   Index name indexExpr -> do -- essa expressão é para acessa uma posição de um array: numeros[1]
     indexValue <- evalExpr fenv env indexExpr
-    case index of 
-      VInt index -> 
+    case indexValue of 
+      VInt i -> 
         case Map.lookup name env of 
-          Notinhg ->
+          Nothing ->
             error ("Array não declarado: " ++ name)
           Just (VArray values) ->
-            return (getArrayElement index values)
+            return (getArrayElement i values)
           Just _ ->
             error "Variável não é um array"
-    _ -> error "Indice do array deve ser inteiro"
+      _ -> 
+        error "Indice do array deve ser inteiro"
 
 
 
