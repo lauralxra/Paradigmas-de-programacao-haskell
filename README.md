@@ -13,7 +13,7 @@ Dentro do GHCI, para executar a suíte de testes:
 ### Equipe e divisão:
 
 * Ana Luísa Vieira da Silva: Suporte ao tipo Float (TFloat, Flit, VFloat), operações e comparações mistas entre Int e Float e os testes correspondentes, feitos em TDD com um commit por ciclo
-* Aline Oliveira: Verificação de tipos e conversão implícita entre Int e Float na declaração (Decl), na atribuição (Assign) e na atribuição a posições de array (AssignIndex), e os testes correspondentes, feitos em TDD com um commit por ciclo
+* Aline Oliveira: Verificação de tipos e conversão implícita entre Int e Float na declaração (Decl), na atribuição (Assign), na atribuição a posições de array (AssignIndex) e na passagem de argumentos para parâmetros de função (Call), e os testes correspondentes, feitos em TDD com um commit por ciclo
 * 
 * 
 
@@ -33,19 +33,24 @@ Dentro do GHCI, para executar a suíte de testes:
 | float    | Float | guarda como está                                  |
 | bool     | Bool  | guarda como está                                  |
 
-A mesma tabela vale para `Decl`, `Assign` e `AssignIndex` (elementos de array).
+A mesma tabela vale para `Decl`, `Assign`, `AssignIndex` (elementos de array) e para
+os argumentos de uma chamada de função, que são ajustados ao tipo declarado de cada
+parâmetro (`metade(5)` com `float x` recebe 2.0; `dobro(2.7)` com `int x` recebe 2).
 Qualquer outra combinação termina com `error` e a mensagem
 `Tipo incompativel: variavel do tipo <tipo> recebeu valor do tipo <tipo>`.
 
 O `Decl` usa o tipo declarado. Já o `Assign` descobre o tipo da variável pelo
 valor que ela já guarda (`tipoDoValor`), porque o `Env` só guarda valores. O
-`AssignIndex` faz o mesmo com o elemento que já está na posição do array.
+`AssignIndex` faz o mesmo com o elemento que já está na posição do array. No `Call`,
+o tipo vem da declaração do parâmetro (`funParams`).
 
 ### Sintaxes e recursos não vistos:
 
 * fromIntegral : função padrão para conversão segura entre Int e Float.
 * truncate : pega a parte inteira, arredondando em direção a zero, como em C (`floor` daria -4 para -3.9).
-* seq : ``a `seq` b`` avalia `a` antes de devolver `b`. É usada no `Decl`, no `Assign` e no `AssignIndex` porque o `Map` é preguiçoso: sem ela, o erro de tipo só apareceria se a variável fosse lida depois.
+* zipWith : aplica uma função a pares de elementos de duas listas. É usada no `Call` para ajustar cada argumento ao tipo do seu parâmetro.
+* foldr seq : avalia todos os elementos de uma lista antes de seguir; no `Call` garante que um argumento incompatível dê erro mesmo que o parâmetro não seja lido.
+* seq : ``a `seq` b`` avalia `a` antes de devolver `b`. É usada no `Decl`, no `Assign`, no `AssignIndex` e no `Call` porque o `Map` é preguiçoso: sem ela, o erro de tipo só apareceria se a variável fosse lida depois.
 
 ### Pendências
 
@@ -56,7 +61,7 @@ valor que ela já guarda (`tipoDoValor`), porque o `Env` só guarda valores. O
 A IA foi usada apenas com o intuito de tirar dúvidas e revisar, não para gerar código.
 
 * Ferramentas utilizadas: Claude, Gemini
-* Exceção (Aline): na verificação de tipos em elementos de array e na integração da branch `tipos` com o main, o código foi escrito pelo Claude Code e revisado por mim.
+* Exceção (Aline): na verificação de tipos em elementos de array, na conversão de argumentos de função e na integração da branch `tipos` com o main, o código foi escrito pelo Claude Code e revisado por mim.
   
 ### Prompts utilizados:
 
@@ -66,3 +71,4 @@ A IA foi usada apenas com o intuito de tirar dúvidas e revisar, não para gerar
 * "Numa comparação mista como 2 == 2.0, o retorno esperado é o VBool True?"
 * "Acrescentaram mais coisas no github, veja o que mais eu posso fazer da minha parte"
 * "Faça tudo que eu posso fazer e adicione o que for necessário no main"
+* "Tente fazer mais commits"
