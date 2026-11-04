@@ -158,8 +158,11 @@ evalExpr fenv env expr = case expr of
           else do
             vals <- mapM (evalExpr fenv env) args
             let params   = map snd (funParams fun)
-                envLocal = Map.fromList (zip params vals)
-            result <- execStmt fenv envLocal (funBody fun)
+                -- cada argumento e ajustado ao tipo do seu parametro, como no Decl
+                vals'    = zipWith ajustaValor (map fst (funParams fun)) vals
+                envLocal = Map.fromList (zip params vals')
+            -- foldr seq: avalia os argumentos ja ajustados antes de executar o corpo
+            result <- foldr seq (execStmt fenv envLocal (funBody fun)) vals'
             case result of
               Returned v _ -> return v
               Next _       -> return VVoid
@@ -429,11 +432,20 @@ funSoma = FunDecl
   , funBody   = Return (BinE Add (Var "a") (Var "b"))
   }
 
+-- float metade(float x) { retorna x / 2; }
+funMetade :: FunDecl
+funMetade = FunDecl
+  { funName   = "metade"
+  , funParams = [(TFloat, "x")]
+  , funBody   = Return (BinE Div (Var "x") (Lit 2))
+  }
+
 fenvExemplo :: FunEnv
 fenvExemplo = Map.fromList
   [ ("dobro",    funDobro)
   , ("fatorial", funFatorial)
   , ("soma",     funSoma)
+  , ("metade",   funMetade)
   ]
 
 -- ============================================================
@@ -769,6 +781,36 @@ prog62 = Block
   , Return (Index "numeros" (Lit 2))
   ]
 
+-- float notas[2]; notas[0] = 2.5; int x = notas[0]; return x;
+prog63 :: Stmt
+prog63 = Block
+  [ DeclArray TFloat "notas" 2
+  , AssignIndex "notas" (Lit 0) (FLit 2.5)
+  , Decl TInt "x" (Index "notas" (Lit 0))
+  , Return (Var "x")
+  ]
+
+-- float notas[3]; notas[0] = 1; notas[1] = 2; imprime(notas);
+prog64 :: Stmt
+prog64 = Block
+  [ DeclArray TFloat "notas" 3
+  , AssignIndex "notas" (Lit 0) (Lit 1)
+  , AssignIndex "notas" (Lit 1) (Lit 2)
+  , Print (Var "notas")
+  ]
+
+-- retorna metade(5);   (parametro float recebe int)
+prog65 :: Stmt
+prog65 = Return (Call "metade" [Lit 5])
+
+-- retorna dobro(2.7);   (parametro int recebe float: x vira 2)
+prog66 :: Stmt
+prog66 = Return (Call "dobro" [FLit 2.7])
+
+-- retorna soma(1.5, 2.5);   (os dois parametros int: 1 + 2)
+prog67 :: Stmt
+prog67 = Return (Call "soma" [FLit 1.5, FLit 2.5])
+
 -- arrays 
 progArrayInt :: Stmt
 progArrayInt = Block
@@ -1093,6 +1135,31 @@ testArrayIntRecebeFloatNegativo = TestCase $ do
   v <- runProg Map.empty prog62
   assertEqual "numeros[2] = -3.9 vira -3" (VInt (-3)) v
 
+testDeclIntComElementoFloat :: Test
+testDeclIntComElementoFloat = TestCase $ do
+  v <- runProg Map.empty prog63
+  assertEqual "int x = notas[0] (2.5) vira 2" (VInt 2) v
+
+testImprimeArrayFloatConvertido :: Test
+testImprimeArrayFloatConvertido = TestCase $ do
+  output <- runProgIO Map.empty prog64
+  assertEqual "imprime array float apos conversao" "[1.0, 2.0, 0.0]\n" output
+
+testParamFloatRecebeInt :: Test
+testParamFloatRecebeInt = TestCase $ do
+  v <- runProg fenvExemplo prog65
+  assertEqual "metade(5) com x float da 2.5" (VFloat 2.5) v
+
+testParamIntRecebeFloat :: Test
+testParamIntRecebeFloat = TestCase $ do
+  v <- runProg fenvExemplo prog66
+  assertEqual "dobro(2.7) com x int da 4" (VInt 4) v
+
+testParamsIntRecebemFloat :: Test
+testParamsIntRecebemFloat = TestCase $ do
+  v <- runProg fenvExemplo prog67
+  assertEqual "soma(1.5, 2.5) com a e b int da 3" (VInt 3) v
+
 -- arrays
 ---- Testa a inicialização de um array de inteiros.
 testArrayInt :: Test
@@ -1159,6 +1226,7 @@ testImprimeIntConvertido = TestCase $ do
 -- int x = 1; x = verdadeiro;
 -- bool r[2]; r[0] = 5;
 -- int a[2]; a = 5;
+-- bool f(bool b) { ... }  f(5);
 
 -- suite completa
 
@@ -1226,6 +1294,11 @@ suite = TestList
   , TestLabel "array float recebe int" testArrayFloatRecebeInt
   , TestLabel "array int recebe float" testArrayIntRecebeFloat
   , TestLabel "array int float neg"   testArrayIntRecebeFloatNegativo
+  , TestLabel "decl int elemento float" testDeclIntComElementoFloat
+  , TestLabel "imprime array convertido" testImprimeArrayFloatConvertido
+  , TestLabel "param float recebe int" testParamFloatRecebeInt
+  , TestLabel "param int recebe float" testParamIntRecebeFloat
+  , TestLabel "params int recebem float" testParamsIntRecebemFloat
   , TestLabel "array Int" testArrayInt
   , TestLabel "array Bool" testArrayBool
   , TestLabel "array Float" testArrayFloat
