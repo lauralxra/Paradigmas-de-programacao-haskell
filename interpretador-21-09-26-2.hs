@@ -344,6 +344,9 @@ tipoDoValor (VInt _)   = TInt
 tipoDoValor (VBool _)  = TBool
 tipoDoValor (VFloat _) = TFloat
 tipoDoValor VVoid      = TVoid
+-- o tipo do array vem dos elementos (todos sao do mesmo tipo)
+tipoDoValor (VArray (v:_)) = TArray (tipoDoValor v)
+tipoDoValor (VArray [])    = TArray TVoid
 
 -- Ajusta o valor ao tipo da variavel, convertendo Int <-> Float como em C
 ajustaValor :: Type -> Value -> Value
@@ -1154,6 +1157,8 @@ testImprimeIntConvertido = TestCase $ do
 -- float f = verdadeiro;
 -- bool b = 2.5;
 -- int x = 1; x = verdadeiro;
+-- bool r[2]; r[0] = 5;
+-- int a[2]; a = 5;
 
 -- suite completa
 
