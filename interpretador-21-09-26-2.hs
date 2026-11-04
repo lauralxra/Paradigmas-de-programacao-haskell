@@ -309,11 +309,14 @@ execStmt fenv env stmt = case stmt of
         newValue <- evalExpr fenv env valueExpr
         case indexValue of
           VInt index -> do
+            -- o tipo do elemento vem do valor que ja esta na posicao
+            let atual = getArrayElement index values
+                v'    = ajustaValor (tipoDoValor atual) newValue
             let updatedValues =
-                  setArrayElement index newValue values
+                  setArrayElement index v' values
             let env' =
                   Map.insert name (VArray updatedValues) env
-            return (Next env')
+            v' `seq` return (Next env')
           _ ->
             error "Indice do array deve ser inteiro"
       Just _ ->
