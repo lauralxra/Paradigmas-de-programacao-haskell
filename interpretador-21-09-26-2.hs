@@ -281,6 +281,38 @@ execStmt fenv env stmt = case stmt of
           Next        env' -> execStmt fenv env' (While cond body)
       _ -> error "Condicao do While nao eh booleana"
 
+    -- Declara um array e inicializa todas as posições.
+  DeclArray ty name size ->
+    if size < 0
+      then error "Tamanho negativo para array"
+      else do
+
+        let initialValues = replicate size (defaultArrayValue ty)
+        let env' = Map.insert name (VArray initialValues) env
+
+        return (Next env')
+
+
+  -- Modifica uma posição específica do array.
+  AssignIndex name indexExpr valueExpr ->
+    case Map.lookup name env of
+      Nothing ->
+        error ("Array nao declarado: " ++ name)
+      Just (VArray values) -> do
+        indexValue <- evalExpr fenv env indexExpr
+        newValue <- evalExpr fenv env valueExpr
+        case indexValue of
+          VInt index -> do
+            let updatedValues =
+                  setArrayElement index newValue values
+            let env' =
+                  Map.insert name (VArray updatedValues) env
+            return (Next env')
+          _ ->
+            error "Indice do array deve ser inteiro"
+      Just _ ->
+        error "Variavel nao eh um array"
+
 -- ============================================================
 -- Execução de um bloco
 -- ============================================================
