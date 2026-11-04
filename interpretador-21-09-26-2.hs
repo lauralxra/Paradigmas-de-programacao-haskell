@@ -429,11 +429,20 @@ funSoma = FunDecl
   , funBody   = Return (BinE Add (Var "a") (Var "b"))
   }
 
+-- float metade(float x) { retorna x / 2; }
+funMetade :: FunDecl
+funMetade = FunDecl
+  { funName   = "metade"
+  , funParams = [(TFloat, "x")]
+  , funBody   = Return (BinE Div (Var "x") (Lit 2))
+  }
+
 fenvExemplo :: FunEnv
 fenvExemplo = Map.fromList
   [ ("dobro",    funDobro)
   , ("fatorial", funFatorial)
   , ("soma",     funSoma)
+  , ("metade",   funMetade)
   ]
 
 -- ============================================================
@@ -787,6 +796,10 @@ prog64 = Block
   , Print (Var "notas")
   ]
 
+-- retorna metade(5);   (parametro float recebe int)
+prog65 :: Stmt
+prog65 = Return (Call "metade" [Lit 5])
+
 -- arrays 
 progArrayInt :: Stmt
 progArrayInt = Block
@@ -1121,6 +1134,11 @@ testImprimeArrayFloatConvertido = TestCase $ do
   output <- runProgIO Map.empty prog64
   assertEqual "imprime array float apos conversao" "[1.0, 2.0, 0.0]\n" output
 
+testParamFloatRecebeInt :: Test
+testParamFloatRecebeInt = TestCase $ do
+  v <- runProg fenvExemplo prog65
+  assertEqual "metade(5) com x float da 2.5" (VFloat 2.5) v
+
 -- arrays
 ---- Testa a inicialização de um array de inteiros.
 testArrayInt :: Test
@@ -1256,6 +1274,7 @@ suite = TestList
   , TestLabel "array int float neg"   testArrayIntRecebeFloatNegativo
   , TestLabel "decl int elemento float" testDeclIntComElementoFloat
   , TestLabel "imprime array convertido" testImprimeArrayFloatConvertido
+  , TestLabel "param float recebe int" testParamFloatRecebeInt
   , TestLabel "array Int" testArrayInt
   , TestLabel "array Bool" testArrayBool
   , TestLabel "array Float" testArrayFloat
