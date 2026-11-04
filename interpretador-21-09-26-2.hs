@@ -610,6 +610,40 @@ prog44 = Return (BinE Div (Lit 7) (Lit 2))
 prog45 :: Stmt
 prog45 = Return (BinE Add (Lit 2) (Lit 3) )
 
+-- arrays 
+progArrayInt :: Stmt
+progArrayInt = Block
+  [ DeclArray TInt "numeros" 3
+  , Return (Index "numeros" (Lit 1))
+  ]
+
+progArrayBool :: Stmt
+progArrayBool = Block
+ [ DeclArray TBool "respostas" 2
+  , Return (Index "respostas" (Lit 0))
+  ]
+
+progArrayFloat :: Stmt
+progArrayFloat = Block
+ [ DeclArray TFloat "notas" 3
+  , Return (Index "notas" (Lit 2))
+  ]
+
+progArrayAssign :: Stmt
+progArrayAssign = Block
+  [ DeclArray TInt "numeros" 3
+  , AssignIndex "numeros" (Lit 1) (Lit 99)
+  , Return (Index "numeros" (Lit 1))
+  ]
+
+progArrayPrint :: Stmt
+progArrayPrint = Block
+ [ DeclArray TInt "numeros" 3
+  , AssignIndex "numeros" (Lit 0) (Lit 10)
+  , AssignIndex "numeros" (Lit 1) (Lit 20)
+  , AssignIndex "numeros" (Lit 2) (Lit 30)
+  , Print (Var "numeros")
+  ]
 -- ============================================================
 -- Suite de testes HUnit
 -- ============================================================
@@ -821,6 +855,38 @@ testAddIntProtecao = TestCase $ do
   v <- runProg Map.empty prog45
   assertEqual "protecao soma inteira" (VInt 5) v
 
+-- arrays
+---- Testa a inicialização de um array de inteiros.
+testArrayInt :: Test
+testArrayInt = TestCase $ do
+  v <- runProg Map.empty progArrayInt
+  assertEqual "array Int inicia com zero" (VInt 0) v
+
+-- Testa a inicialização de um array de booleanos.
+testArrayBool :: Test
+testArrayBool = TestCase $ do
+  v <- runProg Map.empty progArrayBool
+  assertEqual "array Bool inicia com False" (VBool False) v
+
+-- Testa a inicialização de um array de floats.
+testArrayFloat :: Test
+testArrayFloat = TestCase $ do
+  v <- runProg Map.empty progArrayFloat
+  assertEqual "array Float inicia com 0.0" (VFloat 0.0) v
+
+-- Testa a alteração de um elemento.
+testArrayAssign :: Test
+testArrayAssign = TestCase $ do
+  v <- runProg Map.empty progArrayAssign
+  assertEqual "altera a posicao 1" (VInt 99) v
+
+-- Testa a impressão do array completo.
+testArrayPrint :: Test
+testArrayPrint = TestCase $ do
+  output <- runProgIO Map.empty progArrayPrint
+  assertEqual "imprime os elementos do array"
+    "[10, 20, 30]\n" output
+
 -- testes de saída impressa (usam runProgIO)
 
 testWhileImprime :: Test
@@ -892,6 +958,11 @@ suite = TestList
   , TestLabel "desig mista int float" testNeqIntFloatFalse
   , TestLabel "protecao div int"     testDivIntProtecao
   , TestLabel "protecao soma int"    testAddIntProtecao
+  , TestLabel "array Int" testArrayInt
+  , TestLabel "array Bool" testArrayBool
+  , TestLabel "array Float" testArrayFloat
+  , TestLabel "array atribuicao" testArrayAssign
+  , TestLabel "array impressao" testArrayPrint
   ]
 
 main :: IO ()
