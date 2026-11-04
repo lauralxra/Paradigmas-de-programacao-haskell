@@ -19,6 +19,7 @@ data Type
   | TBool
   | TVoid
   | TFloat
+  | TArray Type -- representa um tipo array , como array de Int ou Bool, mas podemos colocar float , por exemplo TArray TFloat
   deriving (Show, Eq)
 
 data BinOp
@@ -35,6 +36,8 @@ data Expr
   | Not   Expr
   | Call  String [Expr]
   | FLit Float
+  | Index String Expr --Acesso a uma posição: numeros[2]
+  -- ainda sobre a adição dessa expressação do indíce do array , o primeiro argumento é o nome do array; o segundo é a expressão que calcula o índice.
   deriving (Show, Eq)
 
 data Stmt
