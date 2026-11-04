@@ -281,7 +281,7 @@ execStmt fenv env stmt = case stmt of
           Next        env' -> execStmt fenv env' (While cond body)
       _ -> error "Condicao do While nao eh booleana"
 
-    -- Declara um array e inicializa todas as posições.
+    -- Declara um array e inicializa todas as posições.(Laura)
   DeclArray ty name size ->
     if size < 0
       then error "Tamanho negativo para array"
@@ -293,7 +293,7 @@ execStmt fenv env stmt = case stmt of
         return (Next env')
 
 
-  -- Modifica uma posição específica do array.
+  -- Modifica uma posição específica do array. (Laura)
   AssignIndex name indexExpr valueExpr ->
     case Map.lookup name env of
       Nothing ->
@@ -334,6 +334,13 @@ showValue (VInt  n) = show n
 showValue (VFloat n) = show n
 showValue (VBool b) = if b then "verdadeiro" else "falso"
 showValue VVoid     = "()"
+showValue (VArray values) = -- laura
+  "[" ++ joinValues values ++ "]"
+joinValues :: [Value] -> String
+joinValues [] = ""
+joinValues [value] = showValue value
+joinValues (value : rest) =
+  showValue value ++ ", " ++ joinValues rest
 
 -- ============================================================
 -- Auxiliares para testes
