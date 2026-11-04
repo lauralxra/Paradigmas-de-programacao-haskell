@@ -158,8 +158,11 @@ evalExpr fenv env expr = case expr of
           else do
             vals <- mapM (evalExpr fenv env) args
             let params   = map snd (funParams fun)
-                envLocal = Map.fromList (zip params vals)
-            result <- execStmt fenv envLocal (funBody fun)
+                -- cada argumento e ajustado ao tipo do seu parametro, como no Decl
+                vals'    = zipWith ajustaValor (map fst (funParams fun)) vals
+                envLocal = Map.fromList (zip params vals')
+            -- foldr seq: avalia os argumentos ja ajustados antes de executar o corpo
+            result <- foldr seq (execStmt fenv envLocal (funBody fun)) vals'
             case result of
               Returned v _ -> return v
               Next _       -> return VVoid
