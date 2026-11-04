@@ -739,6 +739,14 @@ prog59 = Block
   , Return (Var "f")
   ]
 
+-- float notas[3]; notas[0] = 2; return notas[0];
+prog60 :: Stmt
+prog60 = Block
+  [ DeclArray TFloat "notas" 3
+  , AssignIndex "notas" (Lit 0) (Lit 2)
+  , Return (Index "notas" (Lit 0))
+  ]
+
 -- arrays 
 progArrayInt :: Stmt
 progArrayInt = Block
@@ -1048,6 +1056,11 @@ testAssignFloatSomaInteira = TestCase $ do
   v <- runProg Map.empty prog59
   assertEqual "f = 1 + 2 vira 3.0" (VFloat 3.0) v
 
+testArrayFloatRecebeInt :: Test
+testArrayFloatRecebeInt = TestCase $ do
+  v <- runProg Map.empty prog60
+  assertEqual "notas[0] = 2 vira 2.0" (VFloat 2.0) v
+
 -- arrays
 ---- Testa a inicialização de um array de inteiros.
 testArrayInt :: Test
@@ -1176,6 +1189,7 @@ suite = TestList
   , TestLabel "decl int div mista"   testDeclIntDivMista
   , TestLabel "decl float div int"   testDeclFloatDivInteira
   , TestLabel "assign float soma int" testAssignFloatSomaInteira
+  , TestLabel "array float recebe int" testArrayFloatRecebeInt
   , TestLabel "array Int" testArrayInt
   , TestLabel "array Bool" testArrayBool
   , TestLabel "array Float" testArrayFloat
