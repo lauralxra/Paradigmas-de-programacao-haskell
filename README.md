@@ -77,7 +77,7 @@ o tipo vem da declaração do parâmetro (`funParams`).
 A IA foi usada apenas com o intuito de tirar dúvidas e revisar, não para gerar código.
 
 * Ferramentas utilizadas: Claude, Gemini
-* Exceção (Aline): na verificação de tipos em elementos de array e na integração da branch `tipos` com o main, o código foi escrito pelo Claude Code e revisado por mim.
+* (Aline): Durante o desenvolvimento do projeto, foram utilizadas as ferramentas Claude e Gemini para esclarecimento de dúvidas e apoio na compreensão de conceitos relacionados aos paradigmas de programação. O Claude Code também foi utilizado pontualmente como ferramenta auxiliar em operações de versionamento e commits. A utilização dessas ferramentas teve como objetivo auxiliar o processo de desenvolvimento e aprendizagem.
 * (Eduarda): Claude usado para aprender elementos de Haskell do zero, entender o código, interpretar erros do ghci e receber orientação. O código foi digitado e testado por mim a cada ciclo.
 * Laura:O ChatGPT foi utilizado como ferramenta de apoio ao aprendizado de Haskell, esclarecendo dúvidas sobre conceitos básicos, sintaxe e funções nativas da linguagem. Também auxiliou na compreensão do funcionamento de interpretadores e das funções presentes no código-base. Foram solicitados exemplos práticos e trechos de código ilustrativos para facilitar o entendimento dos conceitos estudados. Além disso, foi elaborado um quiz para verificar a compreensão dos conteúdos. A IA foi utilizada como apoio ao estudo e à interpretação do código.
   
