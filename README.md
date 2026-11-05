@@ -59,6 +59,15 @@ o tipo vem da declaração do parâmetro (`funParams`).
 * foldr seq : avalia todos os elementos de uma lista antes de seguir; no `Call` garante que um argumento incompatível dê erro mesmo que o parâmetro não seja lido.
 * seq : ``a `seq` b`` avalia `a` antes de devolver `b`. É usada no `Decl`, no `Assign`, no `AssignIndex` e no `Call` porque o `Map` é preguiçoso: sem ela, o erro de tipo só apareceria se a variável fosse lida depois.
 
+### Exemplos da sintaxe da funcionalidade de arrays implementada no interpretador
+
+| Operação | Exemplo |
+|---|---|
+| Declaração de array | `int a[5];` |
+| Leitura de elemento | `a[0]` |
+| Atribuição de valor | `a[1] = 42;` |
+| Expressão no índice | `a[i + 1]` |
+
 ### Pendências
 
 * Testes automáticos dos casos de erro de tipo (aguardando autorização do professor para usar Control.Exception).
