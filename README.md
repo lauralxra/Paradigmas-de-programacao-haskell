@@ -61,7 +61,7 @@ o tipo vem da declaração do parâmetro (`funParams`).
 A IA foi usada apenas com o intuito de tirar dúvidas e revisar, não para gerar código.
 
 * Ferramentas utilizadas: Claude, Gemini
-* Exceção (Aline): na verificação de tipos em elementos de array, na conversão de argumentos de função e na integração da branch `tipos` com o main, o código foi escrito pelo Claude Code e revisado por mim.
+
   
 ### Prompts utilizados:
 
