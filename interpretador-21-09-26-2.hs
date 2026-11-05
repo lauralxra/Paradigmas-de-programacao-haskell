@@ -266,18 +266,23 @@ execStmt fenv env stmt = case stmt of
     putStrLn (showValue v)
     return (Next env)
 
-  Decl _ x e -> do
+  Decl t x e -> do
     v <- evalExpr fenv env e
-    let env' = Map.insert x v env
-    return (Next env')
+    let v'   = ajustaValor t v
+        env' = Map.insert x v' env
+    -- seq obriga a conversao a acontecer agora: o Map eh preguicoso e o erro
+    -- de tipo nunca apareceria se a variavel nao fosse lida depois
+    v' `seq` return (Next env')
 
   Assign x e ->
     case Map.lookup x env of
       Nothing -> error ("Variavel nao declarada: " ++ x)
-      Just _  -> do
+      Just valorAtual -> do
         v <- evalExpr fenv env e
-        let env' = Map.insert x v env
-        return (Next env')
+        -- o Env so guarda valores: o tipo da variavel vem do valor que ela ja tem
+        let v'   = ajustaValor (tipoDoValor valorAtual) v
+            env' = Map.insert x v' env
+        v' `seq` return (Next env')
 
   If cond t f -> do
     v <- evalExpr fenv env cond
@@ -326,11 +331,14 @@ execStmt fenv env stmt = case stmt of
         newValue <- evalExpr fenv env valueExpr
         case indexValue of
           VInt index -> do
+            -- o tipo do elemento vem do valor que ja esta na posicao
+            let atual = getArrayElement index values
+                v'    = ajustaValor (tipoDoValor atual) newValue
             let updatedValues =
-                  setArrayElement index newValue values
+                  setArrayElement index v' values
             let env' =
                   Map.insert name (VArray updatedValues) env
-            return (Next env')
+            v' `seq` return (Next env')
           _ ->
             error "Indice do array deve ser inteiro"
       Just _ ->
@@ -347,6 +355,31 @@ execBlock fenv env (s:ss) = do
   case r of
     Returned v env' -> return (Returned v env')
     Next       env' -> execBlock fenv env' ss
+
+-- ============================================================
+-- Verificação de tipos
+-- ============================================================
+
+-- Descobre o tipo de um valor
+tipoDoValor :: Value -> Type
+tipoDoValor (VInt _)   = TInt
+tipoDoValor (VBool _)  = TBool
+tipoDoValor (VFloat _) = TFloat
+tipoDoValor VVoid      = TVoid
+-- o tipo do array vem dos elementos (todos sao do mesmo tipo)
+tipoDoValor (VArray (v:_)) = TArray (tipoDoValor v)
+tipoDoValor (VArray [])    = TArray TVoid
+
+-- Ajusta o valor ao tipo da variavel, convertendo Int <-> Float como em C
+ajustaValor :: Type -> Value -> Value
+ajustaValor TInt   (VInt n)   = VInt n
+ajustaValor TInt   (VFloat n) = VInt (truncate n)
+ajustaValor TFloat (VInt n)   = VFloat (fromIntegral n)
+ajustaValor TFloat (VFloat n) = VFloat n
+ajustaValor TBool  (VBool b)  = VBool b
+ajustaValor t      v          =
+  error ("Tipo incompativel: variavel do tipo " ++ show t ++
+         " recebeu valor do tipo " ++ show (tipoDoValor v))
 
 -- ============================================================
 -- Utilitários
@@ -657,6 +690,131 @@ prog44 = Return (BinE Div (Lit 7) (Lit 2))
 -- protecao da soma simples entre inteiros
 prog45 :: Stmt
 prog45 = Return (BinE Add (Lit 2) (Lit 3) )
+-- int x = 5; retorna x;
+prog46 :: Stmt
+prog46 = Block
+  [ Decl TInt "x" (Lit 5)
+  , Return (Var "x")
+  ]
+
+-- bool b = verdadeiro; retorna b;
+prog47 :: Stmt
+prog47 = Block
+  [ Decl TBool "b" (BLit True)
+  , Return (Var "b")
+  ]
+
+-- float f = 1.5; retorna f;
+prog48 :: Stmt
+prog48 = Block
+  [ Decl TFloat "f" (FLit 1.5)
+  , Return (Var "f")
+  ]
+
+-- float f = 2; retorna f;
+prog49 :: Stmt
+prog49 = Block
+  [ Decl TFloat "f" (Lit 2)
+  , Return (Var "f")
+  ]
+
+-- int x = 3.9; retorna x;
+prog50 :: Stmt
+prog50 = Block
+  [ Decl TInt "x" (FLit 3.9)
+  , Return (Var "x")
+  ]
+
+-- int x = -3.9; retorna x;
+prog51 :: Stmt
+prog51 = Block
+  [ Decl TInt "x" (FLit (-3.9))
+  , Return (Var "x")
+  ]
+
+-- int x = 1; x = 7; retorna x;
+prog52 :: Stmt
+prog52 = Block
+  [ Decl TInt "x" (Lit 1)
+  , Assign "x" (Lit 7)
+  , Return (Var "x")
+  ]
+
+-- float f = 1.0; f = 2; retorna f;
+prog53 :: Stmt
+prog53 = Block
+  [ Decl TFloat "f" (FLit 1.0)
+  , Assign "f" (Lit 2)
+  , Return (Var "f")
+  ]
+
+-- int x = 0; x = 3.9; retorna x;
+prog54 :: Stmt
+prog54 = Block
+  [ Decl TInt "x" (Lit 0)
+  , Assign "x" (FLit 3.9)
+  , Return (Var "x")
+  ]
+
+-- int x = 3.9; imprime(x);
+prog55 :: Stmt
+prog55 = Block
+  [ Decl TInt "x" (FLit 3.9)
+  , Print (Var "x")
+  ]
+
+-- int x = 2 + 1.5; retorna x;
+prog56 :: Stmt
+prog56 = Block
+  [ Decl TInt "x" (BinE Add (Lit 2) (FLit 1.5))
+  , Return (Var "x")
+  ]
+
+-- int x = 7 / 2.0; retorna x;
+prog57 :: Stmt
+prog57 = Block
+  [ Decl TInt "x" (BinE Div (Lit 7) (FLit 2.0))
+  , Return (Var "x")
+  ]
+
+-- float f = 5 / 2; retorna f;
+prog58 :: Stmt
+prog58 = Block
+  [ Decl TFloat "f" (BinE Div (Lit 5) (Lit 2))
+  , Return (Var "f")
+  ]
+
+-- float f = 0.0; f = 1 + 2; retorna f;
+prog59 :: Stmt
+prog59 = Block
+  [ Decl TFloat "f" (FLit 0.0)
+  , Assign "f" (BinE Add (Lit 1) (Lit 2))
+  , Return (Var "f")
+  ]
+
+-- float notas[3]; notas[0] = 2; return notas[0];
+prog60 :: Stmt
+prog60 = Block
+  [ DeclArray TFloat "notas" 3
+  , AssignIndex "notas" (Lit 0) (Lit 2)
+  , Return (Index "notas" (Lit 0))
+  ]
+
+-- int numeros[3]; numeros[1] = 3.9; return numeros[1];
+prog61 :: Stmt
+prog61 = Block
+  [ DeclArray TInt "numeros" 3
+  , AssignIndex "numeros" (Lit 1) (FLit 3.9)
+  , Return (Index "numeros" (Lit 1))
+  ]
+
+-- int numeros[3]; numeros[2] = -3.9; return numeros[2];
+prog62 :: Stmt
+prog62 = Block
+  [ DeclArray TInt "numeros" 3
+  , AssignIndex "numeros" (Lit 2) (FLit (-3.9))
+  , Return (Index "numeros" (Lit 2))
+  ]
 
 -- int g = 10; retorna usaGlobal(1)
 progGlobal :: Stmt
@@ -923,6 +1081,85 @@ testAddIntProtecao :: Test
 testAddIntProtecao = TestCase $ do
   v <- runProg Map.empty prog45
   assertEqual "protecao soma inteira" (VInt 5) v
+testDeclIntInt :: Test
+testDeclIntInt = TestCase $ do
+  v <- runProg Map.empty prog46
+  assertEqual "int x = 5" (VInt 5) v
+
+testDeclBoolBool :: Test
+testDeclBoolBool = TestCase $ do
+  v <- runProg Map.empty prog47
+  assertEqual "bool b = verdadeiro" (VBool True) v
+
+testDeclFloatFloat :: Test
+testDeclFloatFloat = TestCase $ do
+  v <- runProg Map.empty prog48
+  assertEqual "float f = 1.5" (VFloat 1.5) v
+
+testDeclFloatInt :: Test
+testDeclFloatInt = TestCase $ do
+  v <- runProg Map.empty prog49
+  assertEqual "float f = 2 vira 2.0" (VFloat 2.0) v
+
+testDeclIntFloat :: Test
+testDeclIntFloat = TestCase $ do
+  v <- runProg Map.empty prog50
+  assertEqual "int x = 3.9 vira 3" (VInt 3) v
+
+testDeclIntFloatNegativo :: Test
+testDeclIntFloatNegativo = TestCase $ do
+  v <- runProg Map.empty prog51
+  assertEqual "int x = -3.9 vira -3" (VInt (-3)) v
+
+testAssignIntInt :: Test
+testAssignIntInt = TestCase $ do
+  v <- runProg Map.empty prog52
+  assertEqual "x = 7" (VInt 7) v
+
+testAssignFloatInt :: Test
+testAssignFloatInt = TestCase $ do
+  v <- runProg Map.empty prog53
+  assertEqual "f = 2 vira 2.0" (VFloat 2.0) v
+
+testAssignIntFloat :: Test
+testAssignIntFloat = TestCase $ do
+  v <- runProg Map.empty prog54
+  assertEqual "x = 3.9 vira 3" (VInt 3) v
+
+testDeclIntSomaMista :: Test
+testDeclIntSomaMista = TestCase $ do
+  v <- runProg Map.empty prog56
+  assertEqual "int x = 2 + 1.5 vira 3" (VInt 3) v
+
+testDeclIntDivMista :: Test
+testDeclIntDivMista = TestCase $ do
+  v <- runProg Map.empty prog57
+  assertEqual "int x = 7 / 2.0 vira 3" (VInt 3) v
+
+testDeclFloatDivInteira :: Test
+testDeclFloatDivInteira = TestCase $ do
+  v <- runProg Map.empty prog58
+  assertEqual "float f = 5 / 2 vira 2.0" (VFloat 2.0) v
+
+testAssignFloatSomaInteira :: Test
+testAssignFloatSomaInteira = TestCase $ do
+  v <- runProg Map.empty prog59
+  assertEqual "f = 1 + 2 vira 3.0" (VFloat 3.0) v
+
+testArrayFloatRecebeInt :: Test
+testArrayFloatRecebeInt = TestCase $ do
+  v <- runProg Map.empty prog60
+  assertEqual "notas[0] = 2 vira 2.0" (VFloat 2.0) v
+
+testArrayIntRecebeFloat :: Test
+testArrayIntRecebeFloat = TestCase $ do
+  v <- runProg Map.empty prog61
+  assertEqual "numeros[1] = 3.9 vira 3" (VInt 3) v
+
+testArrayIntRecebeFloatNegativo :: Test
+testArrayIntRecebeFloatNegativo = TestCase $ do
+  v <- runProg Map.empty prog62
+  assertEqual "numeros[2] = -3.9 vira -3" (VInt (-3)) v
 
 testLeGlobal :: Test
 testLeGlobal = TestCase $ do
@@ -991,6 +1228,19 @@ testImprimeDivFloat :: Test
 testImprimeDivFloat = TestCase $ do 
   output <- runProgIO Map.empty prog35
   assertEqual "impressao divisao float" "2.5\n" output
+testImprimeIntConvertido :: Test
+testImprimeIntConvertido = TestCase $ do
+  output <- runProgIO Map.empty prog55
+  assertEqual "imprime 3 apos conversao" "3\n" output
+
+-- Casos de erro (aguardando autorização do professor para testar com Control.Exception):
+-- int x = verdadeiro;
+-- bool b = 5;
+-- float f = verdadeiro;
+-- bool b = 2.5;
+-- int x = 1; x = verdadeiro;
+-- bool r[2]; r[0] = 5;
+-- int a[2]; a = 5;
 
 -- suite completa
 
@@ -1044,6 +1294,23 @@ suite = TestList
   , TestLabel "le global" testLeGlobal
   , TestLabel "param vence" testParamVence
   , TestLabel "arg ve global" testArgVeGlobal
+  , TestLabel "decl int int"         testDeclIntInt
+  , TestLabel "decl bool bool"       testDeclBoolBool
+  , TestLabel "decl float float"     testDeclFloatFloat
+  , TestLabel "decl float int"       testDeclFloatInt
+  , TestLabel "decl int float"       testDeclIntFloat
+  , TestLabel "decl int float neg"   testDeclIntFloatNegativo
+  , TestLabel "assign int int"       testAssignIntInt
+  , TestLabel "assign float int"     testAssignFloatInt
+  , TestLabel "assign int float"     testAssignIntFloat
+  , TestLabel "imprime convertido"   testImprimeIntConvertido
+  , TestLabel "decl int soma mista"  testDeclIntSomaMista
+  , TestLabel "decl int div mista"   testDeclIntDivMista
+  , TestLabel "decl float div int"   testDeclFloatDivInteira
+  , TestLabel "assign float soma int" testAssignFloatSomaInteira
+  , TestLabel "array float recebe int" testArrayFloatRecebeInt
+  , TestLabel "array int recebe float" testArrayIntRecebeFloat
+  , TestLabel "array int float neg"   testArrayIntRecebeFloatNegativo
   , TestLabel "array Int" testArrayInt
   , TestLabel "array Bool" testArrayBool
   , TestLabel "array Float" testArrayFloat
