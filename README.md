@@ -79,6 +79,7 @@ A IA foi usada apenas com o intuito de tirar dúvidas e revisar, não para gerar
 * Ferramentas utilizadas: Claude, Gemini
 * Exceção (Aline): na verificação de tipos em elementos de array e na integração da branch `tipos` com o main, o código foi escrito pelo Claude Code e revisado por mim.
 * (Eduarda): Claude usado para aprender elementos de Haskell do zero, entender o código, interpretar erros do ghci e receber orientação. O código foi digitado e testado por mim a cada ciclo.
+* Laura:O ChatGPT foi utilizado como ferramenta de apoio ao aprendizado de Haskell, esclarecendo dúvidas sobre conceitos básicos, sintaxe e funções nativas da linguagem. Também auxiliou na compreensão do funcionamento de interpretadores e das funções presentes no código-base. Foram solicitados exemplos práticos e trechos de código ilustrativos para facilitar o entendimento dos conceitos estudados. Além disso, foi elaborado um quiz para verificar a compreensão dos conteúdos. A IA foi utilizada como apoio ao estudo e à interpretação do código.
   
 ### Prompts utilizados:
 
@@ -93,3 +94,4 @@ A IA foi usada apenas com o intuito de tirar dúvidas e revisar, não para gerar
 * "Qual o papel da função evalArgs e por que ela substitui o mapM?"
 * "No conflito de merge do caso Call, por que aceitar as duas versões e depois mover o caso Index para dentro do evalExpr?"
 * "Tente fazer mais commits"
+* "A partir do código do interpretador, identifique as funções criadas e funções nativas e explique cada uma delas."
