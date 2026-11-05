@@ -178,9 +178,12 @@ chamaFuncao fenv env fname args =
             
             (vals, envArgs) <- evalArgs fenv env args 
             let params   = map snd (funParams fun)
-                envLocal = Map.union (Map.fromList (zip params vals)) envArgs
-                envParams = Map.fromList (zip params vals) 
-            result <- execStmt fenv envLocal (funBody fun)
+                -- cada argumento e ajustado ao tipo do seu parametro, como no Decl
+                vals'    = zipWith ajustaValor (map fst (funParams fun)) vals
+                envLocal = Map.union (Map.fromList (zip params vals')) envArgs
+                envParams = Map.fromList (zip params vals')
+            -- foldr seq: avalia os argumentos ja ajustados antes de executar o corpo
+            result <- foldr seq (execStmt fenv envLocal (funBody fun)) vals'
             case result of
               Returned v envFinal -> return (v, atualizaMemoria envArgs envParams envFinal)
               Next envFinal       -> return (VVoid, atualizaMemoria envArgs envParams envFinal)
