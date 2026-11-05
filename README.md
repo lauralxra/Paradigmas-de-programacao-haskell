@@ -87,11 +87,12 @@ A IA foi usada apenas com o intuito de tirar dúvidas e revisar, não para gerar
 * "Como usa o fromIntegral para misturar int com Float no Haskell?"
 * "O operador Mod com Float deve dar erro explícito no intepretador?"
 * "Numa comparação mista como 2 == 2.0, o retorno esperado é o VBool True?"
-* "Acrescentaram mais coisas no github, veja o que mais eu posso fazer da minha parte"
-* "Faça tudo que eu posso fazer e adicione o que for necessário no main"
 * "Como funciona a assinatura de tipo de uma função em Haskell e como definir a da chamaFuncao?"
 * "Por que é necessário alterar o case result of para usar a memória do fim da função?"
 * "Qual o papel da função evalArgs e por que ela substitui o mapM?"
 * "No conflito de merge do caso Call, por que aceitar as duas versões e depois mover o caso Index para dentro do evalExpr?"
-* "Tente fazer mais commits"
 * "A partir do código do interpretador, identifique as funções criadas e funções nativas e explique cada uma delas."
+* “Explique a função ajustaValor deste interpretador: [cole]. Para cada linha da tabela de conversão (int/float/bool), mostre qual equação do código trata aquele caso.”
+* “Por que o Assign descobre o tipo da variável pelo valor que ela já guarda, em vez de guardar o tipo no Env? Quais são as vantagens e as limitações dessa escolha?”
+* “O que significa o Map ser preguiçoso? Por que, sem o seq, um erro de tipo só apareceria quando a variável fosse lida? [cole o trecho do Decl]”
+* “Qual a diferença entre truncate, floor e round em Haskell? Dê exemplos com 3.9 e -3.9.”
