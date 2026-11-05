@@ -15,7 +15,7 @@ Dentro do GHCI, para executar a suíte de testes:
 * Ana Luísa Vieira da Silva: Suporte ao tipo Float (TFloat, Flit, VFloat), operações e comparações mistas entre Int e Float e os testes correspondentes, feitos em TDD com um commit por ciclo
 * Aline Oliveira: Verificação de tipos e conversão implícita entre Int e Float na declaração (Decl), na atribuição (Assign), na atribuição a posições de array (AssignIndex) e na passagem de argumentos para parâmetros de função (Call), e os testes correspondentes, feitos em TDD com um commit por ciclo
 * Maria Eduarda de Souza: Chamada de função, funções passam a enxergar as variáveis globais, com a variável local tendo prioridade quando há nomes iguais, e os argumentos são avaliados da esquerda para a direita, de modo que o argumento seguinte vê a global já atualizada. Testes correspondentes feitos em TDD com um commit por ciclo
-* 
+* Laura de Lima Cavalcante: responsável por implementar o suporte a arrays (vetores) de uma dimensão no interpretador, permitindo trabalhar com coleções de elementos dos tipos Int, Bool e Float.
 
 ### Mudanças e Decisões de Projeto
 
