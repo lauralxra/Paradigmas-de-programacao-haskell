@@ -19,6 +19,7 @@ data Type
   | TBool
   | TVoid
   | TFloat
+  | TString -- Adição do tipo string
   | TArray Type -- representa um tipo array , como array de Int ou Bool, mas podemos colocar float , por exemplo TArray TFloat
   deriving (Show, Eq)
 
