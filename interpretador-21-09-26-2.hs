@@ -381,6 +381,7 @@ tipoDoValor (VArray [])    = TArray TVoid
 -- Ajusta o valor ao tipo da variavel, convertendo Int <-> Float como em C
 ajustaValor :: Type -> Value -> Value
 ajustaValor TInt   (VInt n)   = VInt n
+ajustaValor TString (VString s) = VString s
 ajustaValor TInt   (VFloat n) = VInt (truncate n)
 ajustaValor TFloat (VInt n)   = VFloat (fromIntegral n)
 ajustaValor TFloat (VFloat n) = VFloat n
