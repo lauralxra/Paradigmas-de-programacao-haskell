@@ -132,6 +132,7 @@ evalExpr fenv env expr = case expr of
   Lit  n -> return (VInt n)
   FLit n -> return (VFloat n)
   BLit b -> return (VBool b)
+  SLit s -> return (VString s)
 
   Var x  -> case Map.lookup x env of
                Nothing -> error ("Variavel nao declarada: " ++ x)
