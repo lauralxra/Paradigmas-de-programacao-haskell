@@ -372,6 +372,7 @@ tipoDoValor :: Value -> Type
 tipoDoValor (VInt _)   = TInt
 tipoDoValor (VBool _)  = TBool
 tipoDoValor (VFloat _) = TFloat
+tipoDoValor (VString _) = TString
 tipoDoValor VVoid      = TVoid
 -- o tipo do array vem dos elementos (todos sao do mesmo tipo)
 tipoDoValor (VArray (v:_)) = TArray (tipoDoValor v)
