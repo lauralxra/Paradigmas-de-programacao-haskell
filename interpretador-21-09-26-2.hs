@@ -51,6 +51,7 @@ data Stmt
   | Return Expr                -- return x + y
   | Print  Expr                -- printf (10)
   | Skip
+  | For Stmt Expr Stmt Stmt
   | DeclArray Type String Int -- Declara um array: tipo, nomee tamanho (por isso ta Int , porque é um array unidimensional)
   -- por exemplo em de acordo com a IA - int numeros[3] → DeclArray TInt "numeros" 3 (usando a linguagem c como referencia)
   | AssignIndex String Expr Expr -- Altera uma posição para um outro valor : nome, indece e novo valor 
