@@ -399,6 +399,7 @@ showValue (VInt  n) = show n
 showValue (VFloat n) = show n
 showValue (VBool b) = if b then "verdadeiro" else "falso"
 showValue VVoid     = "()"
+showValue (VString s) = s
 showValue (VArray values) = -- laura
   "[" ++ joinValues values ++ "]"
 joinValues :: [Value] -> String
