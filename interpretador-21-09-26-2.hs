@@ -73,6 +73,7 @@ data Value
   | VBool Bool
   | VVoid
   | VFloat Float
+  | VString String
   | VArray [Value] --representa os elementos do Arrays
   deriving (Show, Eq)
 
