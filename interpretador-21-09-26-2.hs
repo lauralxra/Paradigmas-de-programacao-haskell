@@ -37,6 +37,7 @@ data Expr
   | Not   Expr
   | Call  String [Expr]
   | FLit Float
+  | SLit String
   | Index String Expr --Acesso a uma posição: numeros[2]
   -- ainda sobre a adição dessa expressação do indíce do array , o primeiro argumento é o nome do array; o segundo é a expressão que calcula o índice.
   deriving (Show, Eq)
