@@ -893,6 +893,17 @@ progString = Block
   , Return (Var "nome")
   ]
 
+-- int i = 0; para (; i < 3; i = i + 1) { } retorna i;
+progFor :: Stmt
+progFor = Block
+  [ Decl TInt "i" (Lit 0)
+  , For Skip (BinE Lt (Var "i") (Lit 3))
+      (Assign "i" (BinE Add (Var "i") (Lit 1)))
+      Skip      
+  , Return (Var "i")
+  ]
+
+
 -- arrays 
 progArrayInt :: Stmt
 progArrayInt = Block
@@ -1261,6 +1272,12 @@ testString = TestCase $ do
   v <- runProg Map.empty progString
   assertEqual "string nome = Maria" (VString "Maria") v
 
+testFor :: Test
+testFor = TestCase $ do
+  v <- runProg Map.empty progFor
+  assertEqual "for conta ate 3" (VInt 3) v
+
+
 -- arrays
 ---- Testa a inicialização de um array de inteiros.
 testArrayInt :: Test
@@ -1409,6 +1426,7 @@ suite = TestList
   , TestLabel "array atribuicao" testArrayAssign
   , TestLabel "array impressao" testArrayPrint
   , TestLabel "string" testString
+  , TestLabel "for" testFor
   ]
 
 main :: IO ()
