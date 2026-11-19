@@ -886,6 +886,13 @@ prog66 = Return (Call "dobro" [FLit 2.7])
 prog67 :: Stmt
 prog67 = Return (Call "soma" [FLit 1.5, FLit 2.5])
 
+-- string nome = 'Maria"; retorna nome;
+progString :: Stmt
+progString = Block
+  [ Decl TString "nome" (SLit "Maria")
+  , Return (Var "nome")
+  ]
+
 -- arrays 
 progArrayInt :: Stmt
 progArrayInt = Block
@@ -1249,6 +1256,11 @@ testParamsIntRecebemFloat = TestCase $ do
   v <- runProg fenvExemplo prog67
   assertEqual "soma(1.5, 2.5) com a e b int da 3" (VInt 3) v
 
+testString :: Test
+testString = TestCase $ do
+  v <- runProg Map.empty progString
+  assertEqual "string nome = Maria" (VString "Maria") v
+
 -- arrays
 ---- Testa a inicialização de um array de inteiros.
 testArrayInt :: Test
@@ -1396,6 +1408,7 @@ suite = TestList
   , TestLabel "array Float" testArrayFloat
   , TestLabel "array atribuicao" testArrayAssign
   , TestLabel "array impressao" testArrayPrint
+  , TestLabel "string" testString
   ]
 
 main :: IO ()
