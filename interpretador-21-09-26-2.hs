@@ -317,6 +317,13 @@ execStmt fenv env stmt = case stmt of
           Next        env' -> execStmt fenv env' (While cond body)
       _ -> error "Condicao do While nao eh booleana"
 
+  For ini cond atu corpo -> do 
+        r <- execStmt fenv env ini
+        case r of
+          Returned v' env' -> return (Returned v' env')
+          Next        env' -> execStmt fenv env' (While cond (Block [corpo, atu]))
+
+
     -- Declara um array e inicializa todas as posições.(Laura)
   DeclArray ty name size ->
     if size < 0
